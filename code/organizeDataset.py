@@ -4,14 +4,14 @@ import tarfile
 import subprocess
 from sklearn.model_selection import train_test_split
 
-def clean_folder():
-    # Caminhos dos arquivos e diretórios que desejamos excluir
-    paths_to_delete = [
-        'dataset/BreaKHis_v1',
-        'dataset/BreaKHis_v1.tar.gz',
-        'dataset/test',
-        'dataset/train'
-    ]
+def clean_folder(paths_to_delete):
+    # # Caminhos dos arquivos e diretórios que desejamos excluir
+    # paths_to_delete = [
+    #     'dataset/BreaKHis_v1',
+    #     'dataset/BreaKHis_v1.tar.gz',
+    #     'dataset/test',
+    #     'dataset/train'
+    # ]
 
     # Função para deletar arquivos e diretórios
     for path in paths_to_delete:
@@ -88,7 +88,7 @@ train_dir = "dataset/train"
 test_dir = "dataset/test"
 
 # Remover arquivos
-clean_folder()
+clean_folder(paths_to_delete=['dataset/BreaKHis_v1','dataset/BreaKHis_v1.tar.gz',test_dir,train_dir])
 # Restaurar arquivo tar.gz original
 restore_targz()
 # Extrai tar.gz
@@ -96,4 +96,4 @@ extract_targz()
 # Executar a organização do dataset
 organize_dataset(source_dir, train_dir, test_dir)
 # Remover arquivos
-clean_folder()
+clean_folder(paths_to_delete=['dataset/BreaKHis_v1','dataset/BreaKHis_v1.tar.gz'])
