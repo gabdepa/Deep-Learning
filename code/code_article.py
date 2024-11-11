@@ -492,7 +492,7 @@ test_data_path = 'dataset/test'
 # Carregar o dataset
 train_dataset = datasets.ImageFolder(root=train_data_path, transform=transform)
 test_dataset = datasets.ImageFolder(root=test_data_path, transform=transform)
-cal
+
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
