@@ -95,3 +95,5 @@ restore_targz()
 extract_targz()
 # Executar a organização do dataset
 organize_dataset(source_dir, train_dir, test_dir)
+# Remover arquivos
+clean_folder()
