@@ -4,17 +4,13 @@ import tarfile
 import subprocess
 from sklearn.model_selection import train_test_split
 
-def clean_folder(paths_to_delete):
-    # # Caminhos dos arquivos e diretórios que desejamos excluir
-    # paths_to_delete = [
-    #     'dataset/BreaKHis_v1',
-    #     'dataset/BreaKHis_v1.tar.gz',
-    #     'dataset/test',
-    #     'dataset/train'
-    # ]
-
+def clean_folder(paths):
+    # Check if paths_to_delete is a list of strings
+    if not isinstance(paths, list) or not all(isinstance(path, str) for path in paths):
+        raise TypeError("paths must be a list of strings")
+    
     # Função para deletar arquivos e diretórios
-    for path in paths_to_delete:
+    for path in paths:
         if os.path.isdir(path):
             shutil.rmtree(path)  # Remove diretórios e seus conteúdos
             print(f"Diretório removido: {path}")
@@ -29,7 +25,7 @@ def restore_targz():
     command = 'cat dataset/BreaKHis_v1_part_* > dataset/BreaKHis_v1.tar.gz'
     # Execute the command
     subprocess.run(command, shell=True, check=True)
-    print("Concatenated parts of BreaKHis_v1 into BreaKHis_v1.tar.gz")
+    print("Concatenando partes de BreaKHis_v1_part_* em BreaKHis_v1.tar.gz")
 
 def extract_targz():
 # Path to the tar.gz file
@@ -40,9 +36,13 @@ def extract_targz():
     # Open and extract
     with tarfile.open(file_path, 'r:gz') as tar:
         tar.extractall(path=extract_path, filter='data')  # 'data' preserva os dados sem alterações
-    print(f"Extracted {file_path} to {extract_path}")
+    print(f"Arquivo {file_path} extraído em {extract_path}")
 
-def organize_dataset(source_dir, train_dir, test_dir):
+def organize_dataset(source_dir, train_dir, test_dir, size):
+    # Check if all inputs are strings
+    if not all(isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]):
+        raise TypeError("source_dir, train_dir, and test_dir must all be strings")
+    
     categories = ['benign', 'malignant']
     for category in categories:
         category_path = os.path.join(source_dir, category, "SOB")
@@ -65,8 +65,8 @@ def organize_dataset(source_dir, train_dir, test_dir):
                 print(f"Nenhuma imagem encontrada para o subtipo: {subtype}")
                 continue
             
-            # Dividir em treino e teste (80% - 20%)
-            train_images, test_images = train_test_split(all_images, test_size=0.3, random_state=42)
+            # Dividir em treino e teste
+            train_images, test_images = train_test_split(all_images, test_size=size, random_state=42)
             
             # Mover imagens para as pastas de treino e teste
             for img_path in train_images:
@@ -83,17 +83,18 @@ def organize_dataset(source_dir, train_dir, test_dir):
     print("Organização do dataset concluída.")
 
 # Caminhos iniciais e finais
+breakhis_file = "dataset/BreaKHis_v1.tar.gz"
+breakhis_dir = "dataset/BreaKHis_v1"
 source_dir = "dataset/BreaKHis_v1/histology_slides/breast"
 train_dir = "dataset/train"
 test_dir = "dataset/test"
 
 # Remover arquivos
-clean_folder(paths_to_delete=['dataset/BreaKHis_v1','dataset/BreaKHis_v1.tar.gz',test_dir,train_dir])
+clean_folder(paths=[breakhis_dir, breakhis_file, test_dir, train_dir])
 # Restaurar arquivo tar.gz original
 restore_targz()
 # Extrai tar.gz
 extract_targz()
 # Executar a organização do dataset
-organize_dataset(source_dir, train_dir, test_dir)
-# Remover arquivos
-clean_folder(paths_to_delete=['dataset/BreaKHis_v1','dataset/BreaKHis_v1.tar.gz'])
+organize_dataset(source_dir, train_dir, test_dir, size=0.3)
+# clean_folder(paths=[breakhis_dir, breakhis_file])
