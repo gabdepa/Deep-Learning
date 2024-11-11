@@ -38,7 +38,7 @@ def extract_targz():
         tar.extractall(path=extract_path, filter='data')  # 'data' preserva os dados sem alterações
     print(f"Arquivo {file_path} extraído em {extract_path}")
 
-def organize_dataset(source_dir, train_dir, test_dir, size=0.3):
+def organize_dataset(source_dir, train_dir, test_dir, size=0.2):
     # Check if all inputs are strings
     if not all(isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]):
         raise TypeError("source_dir, train_dir, and test_dir must all be strings")
@@ -96,5 +96,5 @@ restore_targz()
 # Extrai tar.gz
 extract_targz()
 # Executar a organização do dataset
-organize_dataset(source_dir, train_dir, test_dir, size=0.3)
+organize_dataset(source_dir, train_dir, test_dir, size=0.2)
 # clean_folder(paths=[breakhis_dir, breakhis_file])

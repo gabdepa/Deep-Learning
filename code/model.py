@@ -123,7 +123,6 @@ class SaELayer(nn.Module):
             nn.Linear(in_channel, in_channel // self.reduction, bias=False),
             nn.ReLU(inplace=True)
         )
-     
         self.fc = nn.Sequential(
             nn.Linear(in_channel//self.reduction*self.cardinality, in_channel, bias=False),
             nn.Sigmoid()
@@ -136,11 +135,9 @@ class SaELayer(nn.Module):
         y2 = self.fc2(y)
         y_concate = torch.cat([y1,y2],dim=1)
         y_ex_dim = self.fc(y_concate).view(b,c,1,1)
-
         return x * y_ex_dim.expand_as(x)
 
-def conv_block_mo(in_channel, out_channel, kernel_size=3, strid=1, groups=1,
-               activation="h-swish"):  
+def conv_block_mo(in_channel, out_channel, kernel_size=3, strid=1, groups=1, activation="h-swish"):
     padding = (kernel_size - 1) // 2  
     assert activation in ["h-swish", "relu"]  
     return nn.Sequential(
@@ -152,7 +149,6 @@ def conv_block_mo(in_channel, out_channel, kernel_size=3, strid=1, groups=1,
 class SEblock(nn.Module): 
     def __init__(self, channel):  
         super(SEblock, self).__init__() 
-
         self.channel = channel 
         self.attention = nn.Sequential(  
             nn.AdaptiveAvgPool2d(1),  
@@ -169,7 +165,6 @@ class SEblock(nn.Module):
 class HireAtt(nn.Module):
     def __init__(self, in_channels=960, out_channels=512, reduction=16):
         super(HireAtt, self).__init__()
-
         self.gap = nn.AdaptiveAvgPool2d(1)
         self.conv1 = nn.Conv2d(in_channels, out_channels // reduction, 1, 1, 0)
         self.relu1 = nn.ReLU()
@@ -190,7 +185,7 @@ class HireAtt(nn.Module):
         return x_out
 
 class bneck(nn.Module): 
-    def __init__(self, in_channel, out_channel, kernel_size=3, strid=1, t=6., se=True, activation="h-swish", ks=False, ca=False, sk=False):  # 初始化方法
+    def __init__(self, in_channel, out_channel, kernel_size=3, strid=1, t=6., activation="h-swish", se=True, ks=False, ca=False, sk=False):  # 初始化方法
         super(bneck, self).__init__() 
         self.in_channel = in_channel  
         self.out_channel = out_channel  
@@ -203,13 +198,19 @@ class bneck(nn.Module):
 
         layers = []
         if self.t != 1:  
-            layers += [conv_block_mo(self.in_channel, self.hidden_channel, kernel_size=1,
-                                  activation=self.activation)] 
-        layers += [conv_block_mo(self.hidden_channel, self.hidden_channel, kernel_size=self.kernel_size, strid=self.strid,
-                              groups=self.hidden_channel,
-                              activation=self.activation)]  
+            layers += [conv_block_mo(self.in_channel,
+                                     self.hidden_channel,
+                                     kernel_size=1,
+                                     activation=self.activation)] 
+        layers += [conv_block_mo(self.hidden_channel,
+                                 self.hidden_channel,
+                                 kernel_size=self.kernel_size,
+                                 strid=self.strid,
+                                 groups=self.hidden_channel,
+                                 activation=self.activation)]  
         if self.se:  
             layers += [SEblock(self.hidden_channel)]  
+            
         layers += [conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]]  
         self.residul_block = nn.Sequential(*layers)  
         self.sk = sk
@@ -233,12 +234,11 @@ class bneck(nn.Module):
 class MobileNetV3(nn.Module):
     def __init__(self, num_classes, model_size="large", ks=False, ca=False, tr=False, sk=False):  
         super(MobileNetV3, self).__init__() 
-
         self.num_classes = num_classes  
         self.tr = tr
         assert model_size in ["small", "large"]  
         self.model_size = model_size
-        if self.model_size == "small":  
+        if self.model_size == "small":
             self.feature = nn.Sequential(
                 conv_block_mo(3, 16, strid=2, activation="h-swish"),  # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
                 bneck(16, 16, kernel_size=3, strid=2, t=1, se=True, activation="relu"),
@@ -265,7 +265,6 @@ class MobileNetV3(nn.Module):
                 # bneck,(n,96,7,7)-->(n,96,7,7)
                 conv_block_mo(96, 576, kernel_size=1, activation="h-swish")
             )
-
             self.classifier = nn.Sequential(
                 nn.AdaptiveAvgPool2d(1),  # avgpool,(n,576,7,7)-->(n,576,1,1)
                 nn.Conv2d(576, 1024, 1, 1, 0),  # 1x1conv,(n,576,1,1)-->(n,1024,1,1)
@@ -399,7 +398,7 @@ def train_model(model, train_loader, optimizer, criterion=nn.CrossEntropyLoss(),
     return running_loss / len(train_loader)
 
 # Função de Treino vista em Aula
-def train_model_2(model, criterion, optimizer, max_epochs=10, grace_period = 3, device=torch.device("cuda")):
+def train_model_2(model, optimizer, criterion=nn.CrossEntropyLoss(), max_epochs=10, grace_period=3, device=torch.device("cuda")):
     best_loss = math.inf
     curr_grace_period = 0
     best_model = copy.deepcopy(model.state_dict())
@@ -516,7 +515,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
     # Otimizador
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum_value) # Utiliza momentum
-    # optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    #optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Loop Treinamento e Avaliação no conjunto de Teste
     epochs = 50 # Número de épocas máximo
