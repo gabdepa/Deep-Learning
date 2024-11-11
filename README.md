@@ -5,8 +5,3 @@ Code Article: https://github.com/karryxz/Modified-model/blob/main/modified_mobil
 Dataset Article: https://ieeexplore.ieee.org/abstract/document/7312934/authors#authors
 
 Dataset Link: http://www.inf.ufpr.br/vri/databases/BreaKHis_v1.tar.gz
-
-### To restore the dataset
-```
-cat dataset/BreaKHis_v1_part_* > BreaKHis_v1.tar.gz
-```
