@@ -1,6 +1,28 @@
 import os
 import shutil
+import tarfile
+import subprocess
 from sklearn.model_selection import train_test_split
+
+# Command to concatenate the parts into a single tar.gz file
+command = 'cat dataset/BreaKHis_v1_part_* > dataset/BreaKHis_v1.tar.gz'
+
+# Execute the command
+subprocess.run(command, shell=True, check=True)
+
+print("Concatenated parts into BreaKHis_v1.tar.gz")
+
+# Path to the tar.gz file
+file_path = 'dataset/BreaKHis_v1.tar.gz'
+
+# Extract to the specified directory
+extract_path = 'dataset/BreaKHis_v1/'  # Modify as needed
+
+# Open and extract
+with tarfile.open(file_path, 'r:gz') as tar:
+    tar.extractall(path=extract_path)
+
+print(f"Extracted {file_path} to {extract_path}")
 
 # Caminhos iniciais e finais
 source_dir = "dataset/BreaKHis_v1/histology_slides/breast"
