@@ -4,48 +4,45 @@ import tarfile
 import subprocess
 from sklearn.model_selection import train_test_split
 
-# Caminhos dos arquivos e diretórios que desejamos excluir
-paths_to_delete = [
-    'dataset/BreaKHis_v1',
-    'dataset/BreaKHis_v1.tar.gz',
-    'dataset/test',
-    'dataset/train'
-]
+def clean_folder():
+    # Caminhos dos arquivos e diretórios que desejamos excluir
+    paths_to_delete = [
+        'dataset/BreaKHis_v1',
+        'dataset/BreaKHis_v1.tar.gz',
+        'dataset/test',
+        'dataset/train'
+    ]
 
-# Função para deletar arquivos e diretórios
-for path in paths_to_delete:
-    if os.path.isdir(path):
-        shutil.rmtree(path)  # Remove diretórios e seus conteúdos
-        print(f"Diretório removido: {path}")
-    elif os.path.isfile(path):
-        os.remove(path)  # Remove arquivos
-        print(f"Arquivo removido: {path}")
-    else:
-        print(f"Caminho não encontrado para remoção: {path}")
+    # Função para deletar arquivos e diretórios
+    for path in paths_to_delete:
+        if os.path.isdir(path):
+            shutil.rmtree(path)  # Remove diretórios e seus conteúdos
+            print(f"Diretório removido: {path}")
+        elif os.path.isfile(path):
+            os.remove(path)  # Remove arquivos
+            print(f"Arquivo removido: {path}")
+        else:
+            print(f"Caminho não encontrado para remoção: {path}")
 
-# Command to concatenate the parts into a single tar.gz file
-command = 'cat dataset/BreaKHis_v1_part_* > dataset/BreaKHis_v1.tar.gz'
-# Execute the command
-subprocess.run(command, shell=True, check=True)
-print("Concatenated parts into BreaKHis_v1.tar.gz")
+def restore_targz():
+    # Command to concatenate the parts into a single tar.gz file
+    command = 'cat dataset/BreaKHis_v1_part_* > dataset/BreaKHis_v1.tar.gz'
+    # Execute the command
+    subprocess.run(command, shell=True, check=True)
+    print("Concatenated parts of BreaKHis_v1 into BreaKHis_v1.tar.gz")
 
+def extract_targz():
 # Path to the tar.gz file
-file_path = 'dataset/BreaKHis_v1.tar.gz'
-# Extract to the specified directory
-extract_path = 'dataset/'  # Modify as needed
+    file_path = 'dataset/BreaKHis_v1.tar.gz'
+    # Extract to the specified directory
+    extract_path = 'dataset/'  # Modify as needed
 
-# Open and extract
-with tarfile.open(file_path, 'r:gz') as tar:
-    tar.extractall(path=extract_path, filter='data')  # 'data' preserva os dados sem alterações
-print(f"Extracted {file_path} to {extract_path}")
+    # Open and extract
+    with tarfile.open(file_path, 'r:gz') as tar:
+        tar.extractall(path=extract_path, filter='data')  # 'data' preserva os dados sem alterações
+    print(f"Extracted {file_path} to {extract_path}")
 
-# Caminhos iniciais e finais
-source_dir = "dataset/BreaKHis_v1/histology_slides/breast"
-train_dir = "dataset/train"
-test_dir = "dataset/test"
-
-# Função para organizar os dados
-def organize_dataset():
+def organize_dataset(source_dir, train_dir, test_dir):
     categories = ['benign', 'malignant']
     for category in categories:
         category_path = os.path.join(source_dir, category, "SOB")
@@ -69,7 +66,7 @@ def organize_dataset():
                 continue
             
             # Dividir em treino e teste (80% - 20%)
-            train_images, test_images = train_test_split(all_images, test_size=0.2, random_state=42)
+            train_images, test_images = train_test_split(all_images, test_size=0.3, random_state=42)
             
             # Mover imagens para as pastas de treino e teste
             for img_path in train_images:
@@ -83,7 +80,18 @@ def organize_dataset():
                 shutil.copy(img_path, dest)
             
             print(f"Organização concluída para o subtipo {subtype} com {len(train_images)} imagens de treino e {len(test_images)} de teste.")
+    print("Organização do dataset concluída.")
 
+# Caminhos iniciais e finais
+source_dir = "dataset/BreaKHis_v1/histology_slides/breast"
+train_dir = "dataset/train"
+test_dir = "dataset/test"
+
+# Remover arquivos
+clean_folder()
+# Restaurar arquivo tar.gz original
+restore_targz()
+# Extrai tar.gz
+extract_targz()
 # Executar a organização do dataset
-organize_dataset()
-print("Organização do dataset concluída.")
+organize_dataset(source_dir, train_dir, test_dir)
