@@ -25,7 +25,6 @@ Where:
    	   - F = Fibroadenoma
        - TA = Tubular Adenoma
        - PT = Phyllodes Tumor
-
     - M = Malignant
 	   - DC = Ductal Carcinoma
        - LC = Lobular Carcinoma
