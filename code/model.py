@@ -489,8 +489,8 @@ def main():
     train_data_path = 'dataset/train' 
     test_data_path = 'dataset/test' 
     
-    # Transformações
-    transform = transforms.Compose([
+    # Transformações conforme feito no artigo
+    article_transform = transforms.Compose([
         transforms.Resize((224, 224)),  # Redimensionar as imagens
         transforms.ToTensor(), # Convertendo imagens para tensores(Vetor de características)
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # Normalização
@@ -499,8 +499,8 @@ def main():
     ])
 
     # Carregar o dataset
-    train_dataset = datasets.ImageFolder(root=train_data_path, transform=transform)
-    test_dataset = datasets.ImageFolder(root=test_data_path, transform=transform)
+    train_dataset = datasets.ImageFolder(root=train_data_path, transform=article_transform)
+    test_dataset = datasets.ImageFolder(root=test_data_path, transform=article_transform)
     train_loader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
 
