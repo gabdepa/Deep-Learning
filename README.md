@@ -31,3 +31,15 @@ Where:
        - LC = Lobular Carcinoma
        - MC = Mucinous Carcinoma 
        - PC = Papillary Carcinoma
+Example:
+```
+SOB_B_A-14-22549AB-100-001.png
+
+SOB = Surgical Open Biopsy
+B = Benign
+A = Adenosis
+14 = Year, 2014
+22549AB = Identificação Slide
+100 = 100x zoom
+001 = Número de Sequência
+```
