@@ -143,7 +143,6 @@ class SaELayer(nn.Module):
             nn.Linear(in_channel, in_channel // self.reduction, bias=False),
             nn.ReLU(inplace=True),
         )
-
         self.fc = nn.Sequential(
             nn.Linear(
                 in_channel // self.reduction * self.cardinality, in_channel, bias=False
@@ -158,7 +157,6 @@ class SaELayer(nn.Module):
         y2 = self.fc2(y)
         y_concate = torch.cat([y1, y2], dim=1)
         y_ex_dim = self.fc(y_concate).view(b, c, 1, 1)
-
         return x * y_ex_dim.expand_as(x)
 
 
@@ -189,7 +187,6 @@ def conv_block_mo(
 class SEblock(nn.Module):
     def __init__(self, channel):
         super(SEblock, self).__init__()
-
         self.channel = channel
         self.attention = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
@@ -207,7 +204,6 @@ class SEblock(nn.Module):
 class HireAtt(nn.Module):
     def __init__(self, in_channels=960, out_channels=512, reduction=16):
         super(HireAtt, self).__init__()
-
         self.gap = nn.AdaptiveAvgPool2d(1)
         self.conv1 = nn.Conv2d(in_channels, out_channels // reduction, 1, 1, 0)
         self.relu1 = nn.ReLU()
@@ -236,8 +232,8 @@ class bneck(nn.Module):
         kernel_size=3,
         strid=1,
         t=6.0,
-        se=True,
         activation="h-swish",
+        se=True,
         ks=False,
         ca=False,
         sk=False,
@@ -256,7 +252,6 @@ class bneck(nn.Module):
 
         layers = []
         if self.t != 1:
-            # Primeira expansão de convolução
             layers += [
                 conv_block_mo(
                     self.in_channel,
@@ -265,7 +260,6 @@ class bneck(nn.Module):
                     activation=self.activation,
                 )
             ]
-        # Convolução de profundidade dependente do fator de expansão
         layers += [
             conv_block_mo(
                 self.hidden_channel,
@@ -277,13 +271,11 @@ class bneck(nn.Module):
             )
         ]
         if self.se:
-            # Bloco de atenção SE
             layers += [SEblock(self.hidden_channel)]
-        # Convolução final para reduzir a dimensão, seguida de ativação
+
         layers += [
             conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]
         ]
-        # layers += [conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1, activation='none')]  # Sem ativação aqui para preservar a linearidade antes da fusão
         layers += [self.dropout]  # Dropout após a última convolução
 
         self.residul_block = nn.Sequential(*layers)
@@ -311,7 +303,6 @@ class MobileNetV3(nn.Module):
         self, num_classes, model_size="large", ks=False, ca=False, tr=False, sk=False
     ):
         super(MobileNetV3, self).__init__()
-
         self.num_classes = num_classes
         self.tr = tr
         assert model_size in ["small", "large"]
@@ -386,7 +377,6 @@ class MobileNetV3(nn.Module):
                 # bneck,(n,96,7,7)-->(n,96,7,7)
                 conv_block_mo(96, 576, kernel_size=1, activation="h-swish"),
             )
-
             self.classifier = nn.Sequential(
                 nn.AdaptiveAvgPool2d(1),  # avgpool,(n,576,7,7)-->(n,576,1,1)
                 nn.Conv2d(576, 1024, 1, 1, 0),  # 1x1conv,(n,576,1,1)-->(n,1024,1,1)
@@ -740,8 +730,8 @@ def train_model(
 # Função de Treino vista em Aula
 def train_model_2(
     model,
-    criterion,
     optimizer,
+    criterion=nn.CrossEntropyLoss(),
     max_epochs=10,
     grace_period=3,
     device=torch.device("cuda"),
@@ -844,8 +834,8 @@ def main():
     train_data_path = "dataset/train"
     test_data_path = "dataset/test"
 
-    # Transformações
-    transform = transforms.Compose(
+    # Transformações conforme feito no artigo
+    article_transform = transforms.Compose(
         [
             transforms.Resize((224, 224)),  # Redimensionar as imagens
             transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
@@ -862,8 +852,12 @@ def main():
     )
 
     # Carregar o dataset
-    train_dataset = datasets.ImageFolder(root=train_data_path, transform=transform)
-    test_dataset = datasets.ImageFolder(root=test_data_path, transform=transform)
+    train_dataset = datasets.ImageFolder(
+        root=train_data_path, transform=article_transform
+    )
+    test_dataset = datasets.ImageFolder(
+        root=test_data_path, transform=article_transform
+    )
     train_loader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
 
