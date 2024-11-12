@@ -8,7 +8,7 @@ Dataset Link: http://www.inf.ufpr.br/vri/databases/BreaKHis_v1.tar.gz
 
 #### Filename Image Format
 
-<BIOPSY_PROCEDURE>_<TUMOR_CLASS>_<TUMOR_TYPE>_<YEAR>-<SLIDE_ID>-<MAGNIFICATION>-<SEQ>.png
+`<BIOPSY_PROCEDURE>_<TUMOR_CLASS>_<TUMOR_TYPE>_<YEAR>-<SLIDE_ID>-<MAGNIFICATION>-<SEQ>.png`
 
 ```
 BIOPSY_PROCEDURE: SOB
