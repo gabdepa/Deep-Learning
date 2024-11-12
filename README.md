@@ -12,7 +12,7 @@ Dataset Link: http://www.inf.ufpr.br/vri/databases/BreaKHis_v1.tar.gz
 
 ```
 BIOPSY_PROCEDURE: SOB
-TUMOR_CLASS: M|B
+TUMOR_CLASS: B|M
 TUMOR_TYPE: BENIGN_TYPE: A|F|PT|TA Or MALIGNANT_TYPE: DC|LC|MC|PC
 YEAR: DIGIT
 SLIDE_ID: NUMBER,SECTION
