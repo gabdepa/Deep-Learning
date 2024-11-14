@@ -45,13 +45,14 @@ def extract_targz():
 
 
 def organize_dataset(source_dir, train_dir, test_dir, test_size):
+    categories = ["benign", "malignant"]
+
     # Check if all inputs are strings
     if not all(
         isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]
     ):
         raise TypeError("source_dir, train_dir, and test_dir must all be strings")
 
-    categories = ["benign", "malignant"]
     for category in categories:
         category_path = os.path.join(source_dir, category, "SOB")
 
