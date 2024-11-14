@@ -826,7 +826,7 @@ def test_model(model, test_loader, zero_devision_value=0, device=torch.device("c
 # Fluxo principal
 def main():
     # Hyperparâmetros
-    learning_rate = 0.001  # Taxa de Aprendizado
+    learning_rate = 0.0001  # Taxa de Aprendizado
     momentum_value = 0.9  # Valor de momentum
     batch = 32  # Tamanho dos batchs
 
