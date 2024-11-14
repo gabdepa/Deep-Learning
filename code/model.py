@@ -873,10 +873,10 @@ def main():
     # Função de Perda
     criterion = nn.CrossEntropyLoss()
     # Otimizador
-    optimizer = optim.SGD(
-        model.parameters(), lr=learning_rate, momentum=momentum_value
-    )  # Utiliza momentum
-    # optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    # optimizer = optim.SGD(
+    #     model.parameters(), lr=learning_rate, momentum=momentum_value
+    # )  # Utiliza momentum
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Loop Treinamento e Avaliação no conjunto de Teste
     epochs = 50  # Número de épocas máximo
