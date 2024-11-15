@@ -112,5 +112,5 @@ restore_targz()
 # Extrai tar.gz
 extract_targz()
 # Executar a organização do dataset
-organize_dataset(source_dir, train_dir, test_dir, test_size=0.25)
+organize_dataset(source_dir, train_dir, test_dir, test_size=0.2)
 # clean_folder(paths=[breakhis_dir, breakhis_file])
