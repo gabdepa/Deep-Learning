@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from collections import OrderedDict
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 
 ##################### ARTICLE CODE #####################

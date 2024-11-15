@@ -121,6 +121,23 @@ def main():
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # Usa cuda se existir gpu, caso contrario usa cpu
 
+    # Inicializa o modelo
+    model = MobileNetV3(
+        num_classes=num_classes,
+        model_size="small",
+        ks=True,
+        ca=True,
+        tr=False,
+        sk=True,
+    ).to(device)
+
+    # Funcao de perda e otimizador
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+    # Treino
+    epochs = 50
+
     # Caminhos dos dados de treino e teste dataset/test
     train_data_path = "dataset/train"
     test_data_path = "dataset/test"
@@ -160,22 +177,6 @@ def main():
     # Cria o DataLoader para treino
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    # Inicializa o modelo
-    model = MobileNetV3(
-        num_classes=num_classes,
-        model_size="small",
-        ks=True,
-        ca=True,
-        tr=False,
-        sk=True,
-    ).to(device)
-
-    # Funcao de perda e otimizador
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-
-    # Treino
-    epochs = 1
     for epoch in range(epochs):
         train_loss = train_model(model, train_loader, optimizer, criterion, device)
         print(f"Epoch [{epoch+1}/{epochs}]")
