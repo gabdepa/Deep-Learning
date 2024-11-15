@@ -22,17 +22,7 @@ def clean_folder(paths):
             print(f"Caminho não encontrado para remoção: {path}")
 
 
-def restore_targz():
-    # Command to concatenate the parts into a single tar.gz file
-    command = "cat dataset/BreaKHis_v1_part_* > dataset/BreaKHis_v1.tar.gz"
-    # Execute the command
-    subprocess.run(command, shell=True, check=True)
-    print("Concatenando partes de BreaKHis_v1_part_* em BreaKHis_v1.tar.gz")
-
-
-def extract_targz():
-    # Path to the tar.gz file
-    file_path = "dataset/BreaKHis_v1.tar.gz"
+def extract_targz(file_path):
     # Extract to the specified directory
     extract_path = "dataset/"  # Modify as needed
 
@@ -46,6 +36,7 @@ def extract_targz():
 
 def organize_dataset(source_dir, train_dir, test_dir, test_size):
     categories = ["benign", "malignant"]
+    magnifications = ["40X", "100X", "200X", "400X"]
 
     # Check if all inputs are strings
     if not all(
@@ -53,48 +44,73 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
     ):
         raise TypeError("source_dir, train_dir, and test_dir must all be strings")
 
-    for category in categories:
-        category_path = os.path.join(source_dir, category, "SOB")
+    for mag in magnifications:
+        print(f"Processando magnificacao: {mag}")
 
-        if not os.path.exists(category_path):
-            print(f"Caminho não encontrado: {category_path}")
-            continue  # Pular se a categoria não estiver presente
+        for category in categories:
+            category_path = os.path.join(source_dir, category, "SOB")
 
-        for subtype in os.listdir(category_path):
-            subtype_path = os.path.join(category_path, subtype)
-            all_images = []
+            if not os.path.exists(category_path):
+                print(f"Caminho não encontrado: {category_path}")
+                continue  # Pular se a categoria não estiver presente
 
-            # Coletar todas as imagens nas subpastas de forma recursiva
-            for root, _, files in os.walk(subtype_path):
-                images = [
-                    os.path.join(root, img) for img in files if img.endswith(".png")
-                ]
-                all_images.extend(images)
+            for subtype in os.listdir(category_path):
+                subtype_path = os.path.join(category_path, subtype)
 
-            # Verificação se há imagens para dividir
-            if len(all_images) == 0:
-                print(f"Nenhuma imagem encontrada para o subtipo: {subtype}")
-                continue
+                if not os.path.isdir(subtype_path):
+                    continue  # Pula se nao for diretorio
 
-            # Dividir em treino e teste
-            train_images, test_images = train_test_split(
-                all_images, test_size, random_state=42
-            )
+                for slide_id in os.listdir(subtype_path):
+                    slide_id_path = os.path.join(subtype_path, slide_id)
 
-            # Mover imagens para as pastas de treino e teste
-            for img_path in train_images:
-                dest = os.path.join(train_dir, subtype)
-                os.makedirs(dest, exist_ok=True)
-                shutil.copy(img_path, dest)
+                    if not os.path.isdir(slide_id_path):
+                        continue  # Pula se nao for diretorio
 
-            for img_path in test_images:
-                dest = os.path.join(test_dir, subtype)
-                os.makedirs(dest, exist_ok=True)
-                shutil.copy(img_path, dest)
+                    # Caminho pra pasta da magnificacao corrente
+                    mag_path = os.path.join(slide_id_path, mag)
+                    if not os.path.exists(mag_path):
+                        continue  # Termina se diretorio nao existir
 
-            print(
-                f"Organização concluída para o subtipo {subtype} com {len(train_images)} imagens de treino e {len(test_images)} de teste."
-            )
+                    # Coleta as imagens da pasta da magnificacao
+                    all_images = [
+                        os.path.join(mag_path, img)
+                        for img in os.listdir(mag_path)
+                        if img.endswith(".png")
+                    ]
+
+                    # Pula se nao achar imagens
+                    if len(all_images) == 0:
+                        continue
+
+                    # Checa numero de imagens antes de dividir
+                    if len(all_images) >= 2:
+                        # Divide entre teste e treino
+                        train_images, test_images = train_test_split(
+                            all_images, test_size=test_size, random_state=42
+                        )
+                    else:
+                        # Apenas uma imagem, usa como treino
+                        train_images = all_images.copy()
+
+                    # Diretorios destino
+                    train_dest = os.path.join(train_dir, mag, category, subtype)
+                    test_dest = os.path.join(test_dir, mag, category, subtype)
+                    os.makedirs(train_dest, exist_ok=True)
+                    os.makedirs(test_dest, exist_ok=True)
+
+                    # Copia imagens de treino
+                    for img_path in train_images:
+                        shutil.copy(img_path, train_dest)
+
+                    # Copia imagens de teste
+                    for img_path in test_images:
+                        shutil.copy(img_path, test_dest)
+
+                    print(
+                        f"Completo para subtipo: {subtype}, slide {slide_id}, magnificacao {mag} com "
+                        f"{len(train_images)} imagens de treino e {len(test_images)} imagens de teste."
+                    )
+
     print("Organização do dataset concluída.")
 
 
@@ -106,11 +122,10 @@ train_dir = "dataset/train"
 test_dir = "dataset/test"
 
 # Remover arquivos
-clean_folder(paths=[breakhis_dir, breakhis_file, test_dir, train_dir])
-# Restaurar arquivo tar.gz original
-restore_targz()
+clean_folder(paths=[test_dir, train_dir, breakhis_dir])
+
 # Extrai tar.gz
-extract_targz()
+extract_targz(breakhis_file)
+
 # Executar a organização do dataset
 organize_dataset(source_dir, train_dir, test_dir, test_size=0.2)
-# clean_folder(paths=[breakhis_dir, breakhis_file])
