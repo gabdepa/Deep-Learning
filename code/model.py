@@ -272,6 +272,7 @@ class bneck(nn.Module):
         layers += [
             conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]
         ]
+        self.dp = dp  # Define o atributo dp
         if self.dp:
             layers += [self.dropout]  # Dropout após a última convolução
 
