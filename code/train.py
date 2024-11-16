@@ -55,7 +55,7 @@ def main():
     train_data_path = "dataset/train"
 
     # Treino
-    epochs = 1
+    epochs = 50
     learning_rate = 0.0001  # Taxa de Aprendizado
     batch_size = 32  # Tamanho dos batches
 
