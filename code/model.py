@@ -243,6 +243,7 @@ class bneck(nn.Module):
         self.t = t
         self.hidden_channel = int(in_channel * t)
         self.se = se
+        self.dp = dp
         self.activation = activation
         self.dropout = nn.Dropout(dropout_rate)  # Dropout instance
 
