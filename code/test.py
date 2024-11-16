@@ -43,19 +43,18 @@ def test_model(
     results_dir,
     zero_division_value=1,
 ):
-    # Initialize lists to store metrics
+    # I# Inicializa as listas de resultados gerais
     magnification_levels = []
     accuracies = []
     precisions = []
     recalls = []
     f1_scores = []
 
-    # Initialize lists to store overall predictions and labels
     overall_predictions = []
     overall_labels = []
 
     for magnification in magnifications:
-        # Load the test dataset for the current magnification
+        # Carrega o dataset para a mag atual
         test_dataset_magnification = BreastCancerDataset(
             root_dir=test_data_path,
             magnifications=[magnification],
@@ -64,12 +63,11 @@ def test_model(
 
         print(f"Testing for magnification level: {magnification}")
 
-        # Create the test DataLoader
         test_loader = DataLoader(
             test_dataset_magnification, batch_size=batch_size, shuffle=False
         )
 
-        # Evaluate the model for the current magnification
+        # Avalia o modelo para a magnificacao atual
         model.eval()
         all_predictions = []
         all_labels = []
@@ -82,11 +80,11 @@ def test_model(
                 all_predictions.extend(preds.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
-        # Aggregate predictions and labels for overall metrics
+        # Agrega predicoes e rotulos nas metricas gerais
         overall_predictions.extend(all_predictions)
         overall_labels.extend(all_labels)
 
-        # Calculate metrics for the current magnification
+        # Calcula metricas para magnificacoes atuais
         accuracy = accuracy_score(all_labels, all_predictions)
         precision = precision_score(
             all_labels,
@@ -108,14 +106,14 @@ def test_model(
         )
         conf_matrix = confusion_matrix(all_labels, all_predictions)
 
-        # Append metrics to the lists
+        # Adiciona metricas as listas
         magnification_levels.append(magnification)
         accuracies.append(accuracy)
         precisions.append(precision)
         recalls.append(recall)
         f1_scores.append(f1)
 
-        # Plot and save the confusion matrix
+        # Plota e salva matriz de confusao
         plt.figure(figsize=(10, 10))
         sns.heatmap(
             conf_matrix,
@@ -140,7 +138,7 @@ def test_model(
             f"Recall: {recall:.3f}, F1-Score: {f1:.3f}\n"
         )
 
-    # Calculate overall metrics across all magnifications
+    # Calcula metricas totais para todas as magnificacoes
     overall_accuracy = accuracy_score(overall_labels, overall_predictions)
     overall_precision = precision_score(
         overall_labels,
@@ -162,14 +160,14 @@ def test_model(
     )
     overall_conf_matrix = confusion_matrix(overall_labels, overall_predictions)
 
-    # Append overall metrics to the lists
+    # Adiciona metricas as listas
     magnification_levels.append("Overall")
     accuracies.append(overall_accuracy)
     precisions.append(overall_precision)
     recalls.append(overall_recall)
     f1_scores.append(overall_f1)
 
-    # Plot and save the overall confusion matrix
+    # Plota e salva a matriz geral
     plt.figure(figsize=(10, 10))
     sns.heatmap(
         overall_conf_matrix,
@@ -195,7 +193,7 @@ def test_model(
     )
     print("Overall confusion matrix saved as:", overall_cm_filename)
 
-    # Plotting the metrics for each magnification including overall
+    # Metricas para cada mag e geral
     metrics_df = pd.DataFrame(
         {
             "Magnification": magnification_levels,
@@ -206,7 +204,6 @@ def test_model(
         }
     )
 
-    # Melt the DataFrame for easier plotting
     metrics_melted = metrics_df.melt(
         id_vars="Magnification",
         value_vars=["Accuracy", "Precision", "Recall", "F1-Score"],
@@ -214,13 +211,12 @@ def test_model(
         value_name="Value",
     )
 
-    # Set the order for the magnifications
     magnification_order = magnifications + ["Overall"]
     metrics_melted["Magnification"] = pd.Categorical(
         metrics_melted["Magnification"], categories=magnification_order, ordered=True
     )
 
-    # Plot the metrics
+    # Plota as metricas
     plt.figure(figsize=(10, 6))
     sns.barplot(x="Magnification", y="Value", hue="Metric", data=metrics_melted)
     plt.ylim(0, 1)
@@ -246,9 +242,6 @@ def main():
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # Usa cuda se existir gpu, caso contrario usa cpu
-
-    # Iterate over each file in the models directory
-    print("Current working directory:", os.getcwd())
 
     for model_file in os.listdir(models_path):
         if model_file.endswith(".pth"):  # Verifica se arquivo eh do formato PyTorch
