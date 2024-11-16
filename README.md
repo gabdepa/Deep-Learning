@@ -62,17 +62,17 @@ Uma vez que o conjunto de dados está preparado e o ambiente configurado, você 
 
 ```bash
 # Passo 1: Rodar ./code/organizeDataset.py
-./code/organizeDataset.py
+python3.10 ./code/organizeDataset.py
 
 # Passo 2: Rodar ./code/train.py
 # Isto irá treinar com o modelo Large primeiro, depois com o Small, tamanho referente ao modelo MobileNetV3
 # Isso irá treinar e salvar os modelos na pasta ./model
-./code/train.py
+python3.10 ./code/train.py
 
 # Passo 3: Rodar o ./code/test.py
 # Que irá entrar no diretório ./model, e para cada arquivo .pth rodar os testes
 # Os resultados gerados serão salvos na pasta ./results
-./code/test.py
+python3.10 ./code/test.py
 ```
 
 ## Formato dos Nomes de Arquivos de Imagens
