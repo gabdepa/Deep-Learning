@@ -6,6 +6,24 @@ Este repositório contém a implementação de uma versão modificada do MobileN
 
 A implementação do MobileNetV3 modificado pode ser encontrada no [GitHub](https://github.com/karryxz/Modified-model/blob/main/modified_mobilenetv3.py).
 
+## Configuração do Ambiente
+
+Para executar este projeto, você pode configurar um ambiente virtual para gerenciar as dependências. Use os seguintes comandos no bash:
+
+```bash
+# Verificar se o Python 3 está instalado
+python3.10 --version
+
+# Criar um ambiente virtual
+python3.10 -m venv venv
+
+# Ativar o ambiente virtual
+source venv/bin/activate
+
+# Instalar os pacotes necessários
+pip install -r requirements.txt
+```
+
 ## Conjunto de Dados
 
 O conjunto de dados utilizado é o BreaKHis, descrito em detalhes no documento do [IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/7312934/authors#authors). O conjunto de dados pode ser baixado pelo seguinte link:
@@ -38,30 +56,23 @@ Este script irá gerar os diretórios `train` e `test` sob `/dataset` com a segu
 
 Cada subdiretório contém duas categorias principais: `benigno` e `maligno`, que são subdivididos em subtipos como adenose, fibroadenoma, etc.
 
-## Configuração do Ambiente
-
-Para executar este projeto, você pode configurar um ambiente virtual para gerenciar as dependências. Use os seguintes comandos no bash:
-
-```bash
-# Verificar se o Python 3 está instalado
-python3.10 --version
-
-# Criar um ambiente virtual
-python3.10 -m venv venv
-
-# Ativar o ambiente virtual
-source venv/bin/activate
-
-# Instalar os pacotes necessários
-pip install -r requirements.txt
-```
-
 ## Executando o Modelo
 
 Uma vez que o conjunto de dados está preparado e o ambiente configurado, você pode treinar o modelo executando:
 
 ```bash
-python3.10 ./code/train.py
+# Passo 1: Rodar ./code/organizeDataset.py
+./code/organizeDataset.py
+
+# Passo 2: Rodar ./code/train.py
+# Isto irá treinar com o modelo Large primeiro, depois com o Small, tamanho referente ao modelo MobileNetV3
+# Isso irá treinar e salvar os modelos na pasta ./model
+./code/train.py
+
+# Passo 3: Rodar o ./code/test.py
+# Que irá entrar no diretório ./model, e para cada arquivo .pth rodar os testes
+# Os resultados gerados serão salvos na pasta ./results
+./code/test.py
 ```
 
 ## Formato dos Nomes de Arquivos de Imagens
