@@ -44,10 +44,10 @@ Para executar este projeto, você pode configurar um ambiente virtual para geren
 
 ```bash
 # Verificar se o Python 3 está instalado
-python3 --version
+python3.10 --version
 
 # Criar um ambiente virtual
-python3 -m venv venv
+python3.10 -m venv venv
 
 # Ativar o ambiente virtual
 source venv/bin/activate
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 Uma vez que o conjunto de dados está preparado e o ambiente configurado, você pode treinar o modelo executando:
 
 ```bash
-python3 ./code/train.py
+python3.10 ./code/train.py
 ```
 
 ## Formato dos Nomes de Arquivos de Imagens
