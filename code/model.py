@@ -243,6 +243,7 @@ class bneck(nn.Module):
         self.t = t
         self.hidden_channel = int(in_channel * t)
         self.se = se
+        self.dp = dp  # Define o atributo dp
         self.activation = activation
         self.dropout = nn.Dropout(dropout_rate)  # Dropout instance
 
@@ -272,7 +273,6 @@ class bneck(nn.Module):
         layers += [
             conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]
         ]
-        self.dp = dp  # Define o atributo dp
         if self.dp:
             layers += [self.dropout]  # Dropout após a última convolução
 
