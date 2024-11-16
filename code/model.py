@@ -232,6 +232,7 @@ class bneck(nn.Module):
         ks=False,
         ca=False,
         sk=False,
+        dp=False,
         dropout_rate=0.2,
     ):  # 初始化方法
         super(bneck, self).__init__()
@@ -271,7 +272,8 @@ class bneck(nn.Module):
         layers += [
             conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]
         ]
-        layers += [self.dropout]  # Dropout após a última convolução
+        if self.dp:
+            layers += [self.dropout]  # Dropout após a última convolução
 
         self.residul_block = nn.Sequential(*layers)
         self.sk = sk
