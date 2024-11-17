@@ -2,11 +2,7 @@ import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
-from torchvision.transforms.functional import rgb_to_lab
 
-def rgbToLabTransform(img):
-    lab = rgb_to_lab(img)
-    return lab
 
 def evaluateMeanStd(data_path):
     """
@@ -19,7 +15,9 @@ def evaluateMeanStd(data_path):
         data_path (String): Caminho para diretório
     """
     # Resize de 224x224
-    transform = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
+    transform = transforms.Compose(
+        [transforms.Resize((224, 224)), transforms.ToTensor()]
+    )
 
     # Carregamento do conjunto de dados
     dataset = BreastCancerDataset(root_dir=data_path, transform=transform)
