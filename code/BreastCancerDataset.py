@@ -2,8 +2,7 @@ import os
 from torch.utils.data import Dataset
 from torchvision.datasets.folder import default_loader
 
-
-# Custom Dataset class to handle nested directory structure
+# Classe de conjunto de dados personalizada para lidar com estrutura de diretórios aninhados
 class BreastCancerDataset(Dataset):
     def __init__(self, root_dir, magnifications=None, transform=None):
         self.image_paths = []
@@ -17,11 +16,9 @@ class BreastCancerDataset(Dataset):
             "ductal_carcinoma",
             "lobular_carcinoma",
             "mucinous_carcinoma",
-            "papillary_carcinoma",
+            "papillary_carcinoma"
         ]
-        self.class_to_idx = {
-            class_name: idx for idx, class_name in enumerate(self.class_names)
-        }
+        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.class_names)}
         if magnifications is None:
             magnifications = os.listdir(root_dir)
         for magnification in magnifications:

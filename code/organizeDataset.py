@@ -1,12 +1,10 @@
 import os
 import shutil
 import tarfile
-import subprocess
 from sklearn.model_selection import train_test_split
 
-
 def clean_folder(paths):
-    # Check if paths_to_delete is a list of strings
+    # Verifica se paths_to_delete é uma lista de strings
     if not isinstance(paths, list) or not all(isinstance(path, str) for path in paths):
         raise TypeError("paths must be a list of strings")
 
@@ -21,24 +19,22 @@ def clean_folder(paths):
         else:
             print(f"Caminho não encontrado para remoção: {path}")
 
-
 def extract_targz(file_path):
-    # Extract to the specified directory
-    extract_path = "dataset/"  # Modify as needed
+    # Extrai para o diretório especificado
+    extract_path = "dataset/"
 
-    # Open and extract
+    # Abre e extrai
     with tarfile.open(file_path, "r:gz") as tar:
         tar.extractall(
             path=extract_path, filter="data"
         )  # 'data' preserva os dados sem alterações
     print(f"Arquivo {file_path} extraído em {extract_path}")
 
-
 def organize_dataset(source_dir, train_dir, test_dir, test_size):
     categories = ["benign", "malignant"]
     magnifications = ["40X", "100X", "200X", "400X"]
 
-    # Check if all inputs are strings
+    # Verifica se todas as entradas são strings
     if not all(
         isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]
     ):
@@ -58,18 +54,18 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
                 subtype_path = os.path.join(category_path, subtype)
 
                 if not os.path.isdir(subtype_path):
-                    continue  # Pula se nao for diretorio
+                    continue  # Pula se não for diretorio
 
                 for slide_id in os.listdir(subtype_path):
                     slide_id_path = os.path.join(subtype_path, slide_id)
 
                     if not os.path.isdir(slide_id_path):
-                        continue  # Pula se nao for diretorio
+                        continue  # Pula se não for diretorio
 
                     # Caminho pra pasta da magnificacao corrente
                     mag_path = os.path.join(slide_id_path, mag)
                     if not os.path.exists(mag_path):
-                        continue  # Termina se diretorio nao existir
+                        continue  # Termina se diretorio não existir
 
                     # Coleta as imagens da pasta da magnificacao
                     all_images = [
@@ -78,11 +74,11 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
                         if img.endswith(".png")
                     ]
 
-                    # Pula se nao achar imagens
+                    # Pula se não achar imagens
                     if len(all_images) == 0:
                         continue
 
-                    # Checa numero de imagens antes de dividir
+                    # Verifica número de imagens antes de dividir
                     if len(all_images) >= 2:
                         # Divide entre teste e treino
                         train_images, test_images = train_test_split(
@@ -113,7 +109,6 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
 
     print("Organização do dataset concluída.")
 
-
 # Caminhos iniciais e finais
 breakhis_file = "dataset/BreaKHis_v1.tar.gz"
 breakhis_dir = "dataset/BreaKHis_v1"
@@ -128,4 +123,4 @@ clean_folder(paths=[test_dir, train_dir, breakhis_dir])
 extract_targz(breakhis_file)
 
 # Executar a organização do dataset
-organize_dataset(source_dir, train_dir, test_dir, test_size=0.2)
+organize_dataset(source_dir, train_dir, test_dir, test_size=0.2) # 80/20, conforme especificado no artigo
