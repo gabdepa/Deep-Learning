@@ -66,11 +66,8 @@ def test_model(model, data_path, magnifications, batch_size, device, model_file,
     # Transformações para avaliação do modelo treinado
     test_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
-        #transforms.Lambda(lambda x: enhance_colors(x)), # Aplica o realce de cores
-        #transforms.Lambda(lambda x: adaptive_histogram_equalization(x)), # Aplica equalização
-        #transforms.Lambda(lambda x: rgb_to_lab_transform(x)), # Conversão para formato Lab
         transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
-        transforms.Normalize(mean=mean, std=std)  # Normalização
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
     ])
 
     for magnification in magnifications:
