@@ -6,29 +6,14 @@ from collections import OrderedDict
 class SKModel(nn.Module):
     def __init__(self, channel=512, kernels=[3, 5], reduction=2, group=1, L=32):
         super().__init__()
-        self.d = max(L, channel // reduction)
+        self.d = max(L, channel//reduction)
         self.convs = nn.ModuleList([])
         for k in kernels:
-            self.convs.append(
-                nn.Sequential(
-                    OrderedDict(
-                        [
-                            (
-                                "conv",
-                                nn.Conv2d(
-                                    channel,
-                                    channel,
-                                    kernel_size=k,
-                                    padding=k // 2,
-                                    groups=group,
-                                ),
-                            ),
-                            ("bn", nn.BatchNorm2d(channel)),
-                            ("relu", nn.ReLU()),
-                        ]
-                    )
-                )
-            )
+            self.convs.append(nn.Sequential(OrderedDict([
+                ("conv", nn.Conv2d(channel, channel, kernel_size=k, padding=k//2, groups=group)),
+                ("bn", nn.BatchNorm2d(channel)),
+                ("relu", nn.ReLU())
+            ])))
         self.fc = nn.Linear(channel, self.d)
         self.fcs = nn.ModuleList([])
         for i in range(len(kernels)):
@@ -84,13 +69,10 @@ class CoordAtt(nn.Module):
         # self.sae = SaELayer(inp)
         self.pool_h = nn.AdaptiveAvgPool2d((None, 1))
         self.pool_w = nn.AdaptiveAvgPool2d((1, None))
-
         mip = max(8, inp // reduction)
-
         self.conv1 = nn.Conv2d(inp, mip, kernel_size=1, stride=1, padding=0)
         self.bn1 = nn.BatchNorm2d(mip)
         self.act = h_swish()
-
         self.conv_h = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
         self.conv_w = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
 
@@ -115,9 +97,7 @@ class CoordAtt(nn.Module):
 class SaELayer(nn.Module):
     def __init__(self, in_channel, reduction=4):
         super(SaELayer, self).__init__()
-        assert (
-            in_channel >= reduction and in_channel % reduction == 0
-        ), "invalid in_channel in SaElayer"
+        assert(in_channel >= reduction and in_channel % reduction == 0), "invalid in_channel in SaElayer"
         self.reduction = reduction
         self.cardinality = 2
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -132,9 +112,7 @@ class SaELayer(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.fc = nn.Sequential(
-            nn.Linear(
-                in_channel // self.reduction * self.cardinality, in_channel, bias=False
-            ),
+            nn.Linear(in_channel // self.reduction * self.cardinality, in_channel, bias=False),
             nn.Sigmoid(),
         )
 
@@ -151,21 +129,9 @@ def conv_block_mo(in_channel, out_channel, kernel_size=3, strid=1, groups=1, act
     padding = (kernel_size - 1) // 2
     assert activation in ["h-swish", "relu"]
     return nn.Sequential(
-        nn.Conv2d(
-            in_channel,
-            out_channel,
-            kernel_size,
-            strid,
-            padding=padding,
-            groups=groups,
-            bias=False,
-        ),  # conv
-        nn.BatchNorm2d(out_channel),  # bn
-        (
-            nn.Hardswish(inplace=True)
-            if activation == "h-swish"
-            else nn.ReLU(inplace=True)
-        ),  # h-swish/relu
+        nn.Conv2d(in_channel, out_channel, kernel_size, strid, padding=padding, groups=groups, bias=False),  # conv
+        nn.BatchNorm2d(out_channel), # bn
+        (nn.Hardswish(inplace=True) if activation == "h-swish" else nn.ReLU(inplace=True))  # h-swish/relu
     )
 
 class SEblock(nn.Module):
@@ -177,7 +143,7 @@ class SEblock(nn.Module):
             nn.Conv2d(self.channel, self.channel // 4, 1, 1, 0),
             nn.ReLU(inplace=True),
             nn.Conv2d(self.channel // 4, self.channel, 1, 1, 0),
-            nn.Hardswish(inplace=True),
+            nn.Hardswish(inplace=True)
         )
 
     def forward(self, x):
@@ -220,8 +186,8 @@ class bneck(nn.Module):
         ca=False,
         sk=False,
         dp=False,
-        dropout_rate=0.2,
-    ):  # 初始化方法
+        dropout_rate=0.2 # Adicionado pela dupla
+    ): 
         super(bneck, self).__init__()
         self.in_channel = in_channel
         self.out_channel = out_channel
@@ -230,38 +196,18 @@ class bneck(nn.Module):
         self.t = t
         self.hidden_channel = int(in_channel * t)
         self.se = se
-        self.dp = dp  # Define o atributo dp
         self.activation = activation
+        #### Adicionado pela dupla
+        self.dp = dp  # Define o atributo dp
         self.dropout = nn.Dropout(dropout_rate)  # Dropout instance
 
         layers = []
         if self.t != 1:
-            layers += [
-                conv_block_mo(
-                    self.in_channel,
-                    self.hidden_channel,
-                    kernel_size=1,
-                    activation=self.activation,
-                )
-            ]
-        layers += [
-            conv_block_mo(
-                self.hidden_channel,
-                self.hidden_channel,
-                kernel_size=self.kernel_size,
-                strid=self.strid,
-                groups=self.hidden_channel,
-                activation=self.activation,
-            )
-        ]
+            layers += [conv_block_mo(self.in_channel, self.hidden_channel, kernel_size=1, activation=self.activation)]
+        layers += [conv_block_mo(self.hidden_channel, self.hidden_channel, kernel_size=self.kernel_size, strid=self.strid, groups=self.hidden_channel, activation=self.activation)]
         if self.se:
             layers += [SEblock(self.hidden_channel)]
-
-        layers += [
-            conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]
-        ]
-        if self.dp:
-            layers += [self.dropout]  # Dropout após a última convolução
+        layers += [conv_block_mo(self.hidden_channel, self.out_channel, kernel_size=1)[:-1]]
 
         self.residul_block = nn.Sequential(*layers)
         self.sk = sk
@@ -270,6 +216,9 @@ class bneck(nn.Module):
             self.sk_model = SKModel(out_channel)
         if self.ca:
             self.ca_model = CoordAtt(out_channel, out_channel)
+        #### Adicionado pela dupla
+        if self.dp:
+            layers += [self.dropout]  # Dropout após a última convolução
 
     def forward(self, x):
         if self.strid == 1 and self.in_channel == self.out_channel:
@@ -287,381 +236,87 @@ class MobileNetV3(nn.Module):
         super(MobileNetV3, self).__init__()
         assert model_size in ["small", "large"]
         self.num_classes = num_classes
-        self.tr = tr
         self.model_size = model_size
+        self.tr = tr
         if self.model_size == "small":
             self.feature = nn.Sequential(
-                conv_block_mo(
-                    3, 16, strid=2, activation="h-swish"
-                ),  # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
-                bneck(16, 16, kernel_size=3, strid=2, t=1, se=True, activation="relu"),
-                # bneck,(n,16,112,112)-->(n,16,56,56)
-                bneck(
-                    16, 24, kernel_size=3, strid=2, t=4.5, se=False, activation="relu"
-                ),
-                # bneck,(n,16,56,56)-->(n,24,28,28)
-                bneck(
-                    24,
-                    24,
-                    kernel_size=3,
-                    strid=1,
-                    t=88 / 24,
-                    se=False,
-                    activation="relu",
-                    sk=sk,
-                ),
-                # bneck,(n,24,28,28)-->(n,24,28,28)
-                bneck(
-                    24, 40, kernel_size=5, strid=2, t=4, se=True, activation="h-swish"
-                ),
-                # bneck,(n,24,28,28)-->(n,40,14,14)
-                bneck(
-                    40, 40, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"
-                ),
-                # bneck,(n,40,14,14)-->(n,40,14,14)
-                bneck(
-                    40, 40, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"
-                ),
-                # bneck,(n,40,14,14)-->(n,40,14,14)
-                bneck(
-                    40, 48, kernel_size=5, strid=1, t=3, se=True, activation="h-swish"
-                ),
-                # bneck,(n,40,14,14)-->(n,48,14,14)
-                bneck(
-                    48,
-                    48,
-                    kernel_size=5,
-                    strid=1,
-                    t=3,
-                    se=True,
-                    activation="h-swish",
-                    sk=sk,
-                ),
-                # bneck,(n,48,14,14)-->(n,48,14,14)
-                bneck(
-                    48, 96, kernel_size=5, strid=2, t=6, se=True, activation="h-swish"
-                ),
-                # bneck,(n,48,14,14)-->(n,96,7,7)
-                bneck(
-                    96, 96, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"
-                ),
-                # bneck,(n,96,7,7)-->(n,96,7,7)
-                bneck(
-                    96,
-                    96,
-                    kernel_size=5,
-                    strid=1,
-                    t=6,
-                    se=True,
-                    activation="h-swish",
-                    ca=ca,
-                ),
-                # bneck,(n,96,7,7)-->(n,96,7,7)
-                conv_block_mo(96, 576, kernel_size=1, activation="h-swish"),
+                conv_block_mo(3, 16, strid=2, activation="h-swish"), # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
+                bneck(16, 16, kernel_size=3, strid=2, t=1, se=True, activation="relu"), # bneck,(n,16,112,112)-->(n,16,56,56)
+                bneck(16, 24, kernel_size=3, strid=2, t=4.5, se=False, activation="relu"), # bneck,(n,16,56,56)-->(n,24,28,28)
+                bneck(24, 24, kernel_size=3, strid=1, t=88/24, se=False, activation="relu", sk=sk), # bneck,(n,24,28,28)-->(n,24,28,28)
+                bneck(24, 40, kernel_size=5, strid=2, t=4, se=True, activation="h-swish"), # bneck,(n,24,28,28)-->(n,40,14,14)
+                bneck(40, 40, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,40,14,14)-->(n,40,14,14)
+                bneck(40, 40, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,40,14,14)-->(n,40,14,14)
+                bneck(40, 48, kernel_size=5, strid=1, t=3, se=True, activation="h-swish"), # bneck,(n,40,14,14)-->(n,48,14,14)
+                bneck(48, 48, kernel_size=5, strid=1, t=3, se=True, activation="h-swish", sk=sk), # bneck,(n,48,14,14)-->(n,48,14,14)
+                bneck(48, 96, kernel_size=5, strid=2, t=6, se=True, activation="h-swish"), # bneck,(n,48,14,14)-->(n,96,7,7)
+                bneck(96, 96, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,96,7,7)-->(n,96,7,7)
+                bneck(96, 96, kernel_size=5, strid=1, t=6, se=True, activation="h-swish", ca=ca), # bneck,(n,96,7,7)-->(n,96,7,7)
+                conv_block_mo(96, 576, kernel_size=1, activation="h-swish")
             )
             self.classifier = nn.Sequential(
-                nn.AdaptiveAvgPool2d(1),  # avgpool,(n,576,7,7)-->(n,576,1,1)
-                nn.Conv2d(576, 1024, 1, 1, 0),  # 1x1conv,(n,576,1,1)-->(n,1024,1,1)
-                nn.Hardswish(inplace=True),  # h-swish
-                nn.Conv2d(
-                    1024, self.num_classes, 1, 1, 0
-                ),  # 1x1conv,(n,1024,1,1)-->(n,num_classes,1,1)
+                nn.AdaptiveAvgPool2d(1), # avgpool,(n,576,7,7)-->(n,576,1,1)
+                nn.Conv2d(576, 1024, 1, 1, 0), # 1x1conv,(n,576,1,1)-->(n,1024,1,1)
+                nn.Hardswish(inplace=True), # h-swish
+                nn.Conv2d(1024, self.num_classes, 1, 1, 0) # 1x1conv,(n,1024,1,1)-->(n,num_classes,1,1)
             )
-        else:
+        else: # "large" model
             if self.tr:
                 self.feature1 = nn.Sequential(
-                    conv_block_mo(3, 16, strid=2, activation="h-swish"),
-                    # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
-                    bneck(
-                        16, 16, kernel_size=3, strid=1, t=1, se=False, activation="relu"
-                    ),
-                    # bneck,(n,16,112,112)-->(n,16,112,112)
-                    bneck(
-                        16, 24, kernel_size=3, strid=2, t=4, se=False, activation="relu"
-                    ),
-                    # bneck,(n,16,112,112)-->(n,24,56,56)
-                    bneck(
-                        24,
-                        24,
-                        kernel_size=3,
-                        strid=1,
-                        t=3,
-                        se=False,
-                        activation="relu",
-                        sk=sk,
-                    ),
-                    # bneck,(n,24,56,56)-->(n,24,56,56)
+                    conv_block_mo(3, 16, strid=2, activation="h-swish"), # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
+                    bneck(16, 16, kernel_size=3, strid=1, t=1, se=False, activation="relu"), # bneck,(n,16,112,112)-->(n,16,112,112)
+                    bneck(16, 24, kernel_size=3, strid=2, t=4, se=False, activation="relu"), # bneck,(n,16,112,112)-->(n,24,56,56)
+                    bneck(24, 24, kernel_size=3, strid=1, t=3, se=False, activation="relu", sk=sk), # bneck,(n,24,56,56)-->(n,24,56,56)
                 )
                 self.feature2 = nn.Sequential(
-                    bneck(
-                        24, 40, kernel_size=5, strid=2, t=3, se=True, activation="relu"
-                    ),
-                    # bneck,(n,24,56,56)-->(n,40,28,28)
-                    bneck(
-                        40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu"
-                    ),
-                    # bneck,(n,40,28,28)-->(n,40,28,28)
-                    bneck(
-                        40,
-                        40,
-                        kernel_size=5,
-                        strid=1,
-                        t=3,
-                        se=True,
-                        activation="relu",
-                        sk=sk,
-                    ),
-                    # bneck,(n,40,28,28)-->(n,40,28,28)
+                    bneck(24, 40, kernel_size=5, strid=2, t=3, se=True, activation="relu"), # bneck,(n,24,56,56)-->(n,40,28,28)
+                    bneck(40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu"), # bneck,(n,40,28,28)-->(n,40,28,28)
+                    bneck(40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu", sk=sk), # bneck,(n,40,28,28)-->(n,40,28,28)
                 )
                 self.feature3 = nn.Sequential(
-                    bneck(
-                        40,
-                        80,
-                        kernel_size=3,
-                        strid=2,
-                        t=6,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,40,28,28)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.5,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.3,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.3,
-                        se=False,
-                        activation="h-swish",
-                        ca=ca,
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        112,
-                        kernel_size=3,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,112,14,14)
-                    bneck(
-                        112,
-                        112,
-                        kernel_size=3,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,112,14,14)-->(n,112,14,14)
-                    bneck(
-                        112,
-                        160,
-                        kernel_size=5,
-                        strid=2,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                        ca=ca,
-                    ),
-                    # bneck,(n,112,14,14)-->(n,160,7,7)
+                    bneck(40, 80, kernel_size=3, strid=2, t=6, se=False, activation="h-swish"), # bneck,(n,40,28,28)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.5, se=False, activation="h-swish"), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.3, se=False, activation="h-swish"), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.3, se=False, activation="h-swish", ca=ca), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 112, kernel_size=3, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,80,14,14)-->(n,112,14,14)
+                    bneck(112,112, kernel_size=3, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,112,14,14)-->(n,112,14,14)
+                    bneck(112, 160, kernel_size=5, strid=2, t=6, se=True, activation="h-swish", ca=ca), # bneck,(n,112,14,14)-->(n,160,7,7)
                 )
                 self.feature4 = nn.Sequential(
-                    bneck(
-                        160,
-                        160,
-                        kernel_size=5,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,160,7,7)-->(n,160,7,7)
-                    bneck(
-                        160,
-                        160,
-                        kernel_size=5,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,160,7,7)-->(n,160,7,7)
-                    conv_block_mo(160, 960, kernel_size=1, activation="h-swish"),
-                    # conv+bn+h-swish,(n,160,7,7)-->(n,960,7,7)
+                    bneck(160, 160, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,160,7,7)-->(n,160,7,7)
+                    bneck(160, 160, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,160,7,7)-->(n,160,7,7)
+                    conv_block_mo(160, 960, kernel_size=1, activation="h-swish") # conv+bn+h-swish,(n,160,7,7)-->(n,960,7,7)
                 )
 
             else:
                 self.feature = nn.Sequential(
-                    conv_block_mo(
-                        3, 16, strid=2, activation="h-swish"
-                    ),  # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
-                    bneck(
-                        16, 16, kernel_size=3, strid=1, t=1, se=False, activation="relu"
-                    ),
-                    # bneck,(n,16,112,112)-->(n,16,112,112)
-                    bneck(
-                        16, 24, kernel_size=3, strid=2, t=4, se=False, activation="relu"
-                    ),
-                    # bneck,(n,16,112,112)-->(n,24,56,56)
-                    bneck(
-                        24,
-                        24,
-                        kernel_size=3,
-                        strid=1,
-                        t=3,
-                        se=False,
-                        activation="relu",
-                        sk=sk,
-                    ),
-                    # bneck,(n,24,56,56)-->(n,24,56,56)
-                    bneck(
-                        24, 40, kernel_size=5, strid=2, t=3, se=True, activation="relu"
-                    ),
-                    # bneck,(n,24,56,56)-->(n,40,28,28)
-                    bneck(
-                        40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu"
-                    ),
-                    # bneck,(n,40,28,28)-->(n,40,28,28)
-                    bneck(
-                        40,
-                        40,
-                        kernel_size=5,
-                        strid=1,
-                        t=3,
-                        se=True,
-                        activation="relu",
-                        sk=sk,
-                    ),
-                    # bneck,(n,40,28,28)-->(n,40,28,28)
-                    bneck(
-                        40,
-                        80,
-                        kernel_size=3,
-                        strid=2,
-                        t=6,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,40,28,28)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.5,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.3,
-                        se=False,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        80,
-                        kernel_size=3,
-                        strid=1,
-                        t=2.3,
-                        se=False,
-                        activation="h-swish",
-                        ca=ca,
-                    ),
-                    # bneck,(n,80,14,14)-->(n,80,14,14)
-                    bneck(
-                        80,
-                        112,
-                        kernel_size=3,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,80,14,14)-->(n,112,14,14)
-                    bneck(
-                        112,
-                        112,
-                        kernel_size=3,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,112,14,14)-->(n,112,14,14)
-                    bneck(
-                        112,
-                        160,
-                        kernel_size=5,
-                        strid=2,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                        ca=ca,
-                    ),
-                    # bneck,(n,112,14,14)-->(n,160,7,7)
-                    bneck(
-                        160,
-                        160,
-                        kernel_size=5,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,160,7,7)-->(n,160,7,7)
-                    bneck(
-                        160,
-                        160,
-                        kernel_size=5,
-                        strid=1,
-                        t=6,
-                        se=True,
-                        activation="h-swish",
-                    ),
-                    # bneck,(n,160,7,7)-->(n,160,7,7)
-                    conv_block_mo(
-                        160, 960, kernel_size=1, activation="h-swish"
-                    ),  # conv+bn+h-swish,(n,160,7,7)-->(n,960,7,7)
+                    conv_block_mo(3, 16, strid=2, activation="h-swish"),  # conv+bn+h-swish,(n,3,224,224)-->(n,16,112,112)
+                    bneck(16, 16, kernel_size=3, strid=1, t=1, se=False, activation="relu"), # bneck,(n,16,112,112)-->(n,16,112,112)
+                    bneck(16, 24, kernel_size=3, strid=2, t=4, se=False, activation="relu"), # bneck,(n,16,112,112)-->(n,24,56,56)
+                    bneck(24, 24, kernel_size=3, strid=1, t=3, se=False, activation="relu", sk=sk), # bneck,(n,24,56,56)-->(n,24,56,56)
+                    bneck(24, 40, kernel_size=5, strid=2, t=3, se=True, activation="relu"), # bneck,(n,24,56,56)-->(n,40,28,28)
+                    bneck(40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu"), # bneck,(n,40,28,28)-->(n,40,28,28)
+                    bneck(40, 40, kernel_size=5, strid=1, t=3, se=True, activation="relu", sk=sk), # bneck,(n,40,28,28)-->(n,40,28,28)
+                    bneck(40, 80, kernel_size=3, strid=2, t=6, se=False, activation="h-swish"), # bneck,(n,40,28,28)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.5, se=False, activation="h-swish"), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.3, se=False, activation="h-swish"), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 80, kernel_size=3, strid=1, t=2.3, se=False, activation="h-swish", ca=ca), # bneck,(n,80,14,14)-->(n,80,14,14)
+                    bneck(80, 112, kernel_size=3, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,80,14,14)-->(n,112,14,14)
+                    bneck(112, 112, kernel_size=3, strid=1, t=6, se=True, activation="h-swish"),# bneck,(n,112,14,14)-->(n,112,14,14)
+                    bneck(112, 160, kernel_size=5, strid=2, t=6, se=True, activation="h-swish", ca=ca), # bneck,(n,112,14,14)-->(n,160,7,7)
+                    bneck(160, 160, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,160,7,7)-->(n,160,7,7)
+                    bneck(160, 160, kernel_size=5, strid=1, t=6, se=True, activation="h-swish"), # bneck,(n,160,7,7)-->(n,160,7,7)
+                    conv_block_mo(160, 960, kernel_size=1, activation="h-swish"),  # conv+bn+h-swish,(n,160,7,7)-->(n,960,7,7)
                 )
 
             if self.tr:
                 self.tr_model = HireAtt(1184, 960)
 
             self.classifier = nn.Sequential(
-                nn.AdaptiveAvgPool2d(1),  # avgpool,(n,960,7,7)-->(n,960,1,1)
-                nn.Conv2d(960, 1280, 1, 1, 0),  # 1x1conv,(n,960,1,1)-->(n,1280,1,1)
-                nn.Hardswish(inplace=True),  # h-swish
-                nn.Conv2d(
-                    1280, self.num_classes, 1, 1, 0
-                ),  # 1x1conv,(n,1280,1,1)-->(n,num_classes,1,1)
+                nn.AdaptiveAvgPool2d(1), # avgpool,(n,960,7,7)-->(n,960,1,1)
+                nn.Conv2d(960, 1280, 1, 1, 0), # 1x1conv,(n,960,1,1)-->(n,1280,1,1)
+                nn.Hardswish(inplace=True), # h-swish
+                nn.Conv2d(1280, self.num_classes, 1, 1, 0) # 1x1conv,(n,1280,1,1)-->(n,num_classes,1,1)
             )
 
     def forward(self, x):
@@ -672,7 +327,6 @@ class MobileNetV3(nn.Module):
             x4 = self.feature4(x3)
             x = self.tr_model(x1, x2, x3, x4)
         else:
-            # If 'tr' is False, use the single 'feature' attribute for feature extraction
             x = self.feature(x)
         x = self.classifier(x)
         return x.view(-1, self.num_classes)  # (n,num_classes,1,1)-->(n,num_classes)
