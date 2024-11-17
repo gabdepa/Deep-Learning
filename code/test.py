@@ -60,9 +60,6 @@ def test_model(model, data_path, magnifications, batch_size, device, model_file,
     overall_predictions = []
     overall_labels = []
 
-    # Calculo de média e desvio padrão dos pixels das imagens
-    mean, std = evaluateMeanStd(data_path)
-
     # Transformações para avaliação do modelo treinado
     test_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
