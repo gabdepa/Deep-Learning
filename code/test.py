@@ -64,7 +64,7 @@ def test_model(model, data_path, magnifications, batch_size, device, model_file,
     test_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
         transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
+        #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
     ])
 
     for magnification in magnifications:
@@ -253,7 +253,7 @@ def main():
     for model_file in os.listdir(models_path):
         # Verifica se arquivo é do formato PyTorch
         if model_file.endswith(".pth"):
-            print(f"Modelo: {model_file}")
+            print(f"\n\nModelo: {model_file}")
             model_path = os.path.join(models_path, model_file)
             # Carrega o modelo completo
             model = torch.load(model_path, weights_only=False).to(device)

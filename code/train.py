@@ -134,7 +134,7 @@ def main():
         transforms.RandomHorizontalFlip(p=0.25), # Invertendo a imagem horizontalmente com probabilidade 25%
         transforms.RandomVerticalFlip(p=0.25), # Invertendo a imagem verticalmente com probabilidade 25%
         transforms.ToTensor(), # Convertendo imagens para tensores(Vetor de características)
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
+       # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
     ])
 
     # Carrega o dataset de treino com todas as magnificações
@@ -150,7 +150,7 @@ def main():
         criterion=criterion,
         device=device,
         epochs=epochs,
-        model_name="large_model_best.pth" 
+        model_name="large_model_nonorm.pth" 
     )
     
     # Treinando modelo "small" no conjunto de treino
@@ -163,7 +163,7 @@ def main():
         criterion=criterion,
         device=device,
         epochs=epochs,
-        model_name="small_model_best.pth" 
+        model_name="small_model_nonorm.pth" 
     )
 
 if __name__ == "__main__":
