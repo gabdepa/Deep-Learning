@@ -4,7 +4,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-from model import MobileNetV3
 from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
