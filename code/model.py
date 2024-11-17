@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import torchvision.transforms as transforms
 from collections import OrderedDict
 
 ##################### ARTICLE CODE #####################
@@ -149,9 +147,7 @@ class SaELayer(nn.Module):
         y_ex_dim = self.fc(y_concate).view(b, c, 1, 1)
         return x * y_ex_dim.expand_as(x)
 
-def conv_block_mo(
-    in_channel, out_channel, kernel_size=3, strid=1, groups=1, activation="h-swish"
-):
+def conv_block_mo(in_channel, out_channel, kernel_size=3, strid=1, groups=1, activation="h-swish"):
     padding = (kernel_size - 1) // 2
     assert activation in ["h-swish", "relu"]
     return nn.Sequential(
@@ -287,9 +283,7 @@ class bneck(nn.Module):
         return out
 
 class MobileNetV3(nn.Module):
-    def __init__(
-        self, num_classes, model_size="large", ks=False, ca=False, tr=False, sk=False
-    ):
+    def __init__(self, num_classes, model_size="large", ks=False, ca=False, tr=False, sk=False):
         super(MobileNetV3, self).__init__()
         assert model_size in ["small", "large"]
         self.num_classes = num_classes

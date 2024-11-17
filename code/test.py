@@ -6,14 +6,8 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
+from datasetMeanValue import evaluateMeanStd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-
-# Transformações para avaliação do modelo treinado
-test_transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Redimensionar as imagens
-    transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
-])
 
 # Função de teste
 def test_model(model, test_data_path, magnifications, batch_size, device, model_file, results_dir, zero_division_value=1):
@@ -25,6 +19,16 @@ def test_model(model, test_data_path, magnifications, batch_size, device, model_
     f1_scores = []
     overall_predictions = []
     overall_labels = []
+
+    # Calculo de média e desvio padrão dos pixels das imagens
+    mean, std = evaluateMeanStd(test_data_path)
+
+    # Transformações para avaliação do modelo treinado
+    test_transform = transforms.Compose([
+        transforms.Resize((224, 224)),  # Redimensionar as imagens
+        transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
+        transforms.Normalize(mean=mean, std=std) # Normalização
+    ])
 
     for magnification in magnifications:
         print(f"Testing for magnification level: {magnification}")
@@ -51,7 +55,7 @@ def test_model(model, test_data_path, magnifications, batch_size, device, model_
                 all_predictions.extend(preds.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
-        # Agrega predições e rótulos nas metricas gerais
+        # Agrega predições e rótulos nas métricas gerais
         overall_predictions.extend(all_predictions)
         overall_labels.extend(all_labels)
 

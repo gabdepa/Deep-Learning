@@ -1,33 +1,38 @@
-from BreastCancerDataset import BreastCancerDataset
 import torch
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader
+from BreastCancerDataset import BreastCancerDataset
 
+def evaluateMeanStd(data_path):
+    """
+    O código calcula a média e o desvio padrão dos pixels das imagens para normalizar o conjunto de dados.
+    Proporcionando uma normalização mais precisa dos dados,
+    • Precisão: Soma todos os valores de pixels e seus quadrados, considerando o total de pixels, resultando em cálculos estatísticos precisos.
+    • Normalização Eficiente: Fornece médias e desvios padrão corretos para normalizar os dados, melhorando o desempenho do modelo.
+    • Consistência: Evita distorções causadas por tamanhos de lote ou dimensões de imagem diferentes.
+    Args:
+        data_path (String): Caminho para diretório
+    """
+    # Resize de 224x224
+    transform = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()]) 
 
-def main():
-    train_data_path = "dataset/train"
-
-    transform = transforms.Compose(
-        [transforms.Resize((224, 224)), transforms.ToTensor()]
-    )
-
-    # Carregamento do seu conjunto de dados
-    dataset = BreastCancerDataset(root_dir=train_data_path, transform=transform)
+    # Carregamento do conjunto de dados
+    dataset = BreastCancerDataset(root_dir=data_path, transform=transform)
     loader = DataLoader(dataset, batch_size=32, shuffle=False)
 
     # Calculando a média e desvio padrão
     mean = torch.zeros(3)
     std = torch.zeros(3)
+    total_pixels = 0
     for images, _ in loader:
-        for i in range(3):
-            mean[i] += images[:, i, :, :].mean()
-            std[i] += images[:, i, :, :].std()
-    mean.div_(len(dataset))
-    std.div_(len(dataset))
+        batch_pixels = images.size(0) * images.size(2) * images.size(3)
+        total_pixels += batch_pixels
+        mean += images.sum(dim=[0, 2, 3])
+        std += (images ** 2).sum(dim=[0, 2, 3])
 
-    print(f"Mean: {mean}")
-    print(f"Std: {std}")
+    mean /= total_pixels
+    std = torch.sqrt(std / total_pixels - mean ** 2)
 
-
-if __name__ == "__main__":
-    main()
+    print(f"Média para {data_path}: {mean}")
+    print(f"Desvio Padrão {data_path}: {std}")
+    return mean, std
