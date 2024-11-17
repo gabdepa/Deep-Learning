@@ -85,7 +85,7 @@ def train_model(model, train_dataset, batch_size, optimizer, criterion, device, 
     model_name = f"{dir_path}{model_name}"
     # Salva o modelo ao final do treinamento
     torch.save(model, model_name)
-    print(f"Modelo treinado salvo em: {model_name}")
+    print(f"Modelo treinado salvo em: {model_name}\n")
 
 # Fluxo principal
 def main():
