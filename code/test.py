@@ -200,10 +200,10 @@ def main():
     for model_file in os.listdir(models_path):
         # Verifica se arquivo é do formato PyTorch
         if model_file.endswith(".pth"): 
-            print(f"{model_file}")
+            print(f"Modelo: {model_file}")
             model_path = os.path.join(models_path, model_file)
             # Carrega o modelo completo
-            model = torch.load(model_path).to(device)
+            model = torch.load(model_path, weights_only=False).to(device)
             # Testando modelo atual no conjunto de teste
             test_model(
                 model=model,

@@ -4,7 +4,6 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 from collections import OrderedDict
 
-
 ##################### ARTICLE CODE #####################
 class SKModel(nn.Module):
     def __init__(self, channel=512, kernels=[3, 5], reduction=2, group=1, L=32):
@@ -65,7 +64,6 @@ class SKModel(nn.Module):
         V = (attention_weughts * feats).sum(0)
         return V
 
-
 class h_sigmoid(nn.Module):
     def __init__(self, inplace=True):
         super(h_sigmoid, self).__init__()
@@ -74,7 +72,6 @@ class h_sigmoid(nn.Module):
     def forward(self, x):
         return self.relu(x + 3) / 6
 
-
 class h_swish(nn.Module):
     def __init__(self, inplace=True):
         super(h_swish, self).__init__()
@@ -82,7 +79,6 @@ class h_swish(nn.Module):
 
     def forward(self, x):
         return x * self.sigmoid(x)
-
 
 class CoordAtt(nn.Module):
     def __init__(self, inp, oup, reduction=2):
@@ -117,7 +113,6 @@ class CoordAtt(nn.Module):
         a_h = self.conv_h(x_h).sigmoid()
         a_w = self.conv_w(x_w).sigmoid()
         return a_w * a_h
-
 
 class SaELayer(nn.Module):
     def __init__(self, in_channel, reduction=4):
@@ -154,7 +149,6 @@ class SaELayer(nn.Module):
         y_ex_dim = self.fc(y_concate).view(b, c, 1, 1)
         return x * y_ex_dim.expand_as(x)
 
-
 def conv_block_mo(
     in_channel, out_channel, kernel_size=3, strid=1, groups=1, activation="h-swish"
 ):
@@ -178,7 +172,6 @@ def conv_block_mo(
         ),  # h-swish/relu
     )
 
-
 class SEblock(nn.Module):
     def __init__(self, channel):
         super(SEblock, self).__init__()
@@ -194,7 +187,6 @@ class SEblock(nn.Module):
     def forward(self, x):
         a = self.attention(x)
         return a * x
-
 
 class HireAtt(nn.Module):
     def __init__(self, in_channels=960, out_channels=512, reduction=16):
@@ -217,7 +209,6 @@ class HireAtt(nn.Module):
         x_out = self.sigmoid2(x_out)
         x_out = x_out * x4
         return x_out
-
 
 class bneck(nn.Module):
     def __init__(
@@ -295,15 +286,14 @@ class bneck(nn.Module):
             out = self.ca_model(out) + out
         return out
 
-
 class MobileNetV3(nn.Module):
     def __init__(
         self, num_classes, model_size="large", ks=False, ca=False, tr=False, sk=False
     ):
         super(MobileNetV3, self).__init__()
+        assert model_size in ["small", "large"]
         self.num_classes = num_classes
         self.tr = tr
-        assert model_size in ["small", "large"]
         self.model_size = model_size
         if self.model_size == "small":
             self.feature = nn.Sequential(
@@ -682,7 +672,6 @@ class MobileNetV3(nn.Module):
 
     def forward(self, x):
         if self.tr:
-            # Use the multi-stage feature extraction if 'tr' is True
             x1 = self.feature1(x)
             x2 = self.feature2(x1)
             x3 = self.feature3(x2)
