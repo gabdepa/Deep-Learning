@@ -26,7 +26,7 @@ def evaluateMeanStd(data_path):
         - Calcula a soma dos valores de pixels e a soma dos quadrados.
         - Atualiza o número total de pixels processados.
     - Calcula a média dividindo a soma dos valores pelo número total de pixels.
-    - Calcula o desvio padrão usando a fórmula: \(\sqrt{\text{soma dos quadrados / total de pixels} - \text{média}^2}\).
+    - Calcula o desvio padrão usando a fórmula: \\(\sqrt{\text{soma dos quadrados / total de pixels} - \text{média}^2}\).
 
     4. **Exibição dos Resultados**:
     - Exibe os valores calculados de média e desvio padrão para cada canal (R, G, B).
