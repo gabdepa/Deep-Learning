@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
 
 def evaluateMeanStd(data_path):
-    """
+    r"""
     Esta função calcula a média e o desvio padrão dos pixels das imagens em um conjunto de dados, facilitando a normalização durante o pré-processamento.
 
     ### Parâmetros:
