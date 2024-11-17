@@ -117,6 +117,5 @@ def main():
         save_path="model/small_model.pth",
     )
 
-
 if __name__ == "__main__":
     main()
