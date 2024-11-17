@@ -1,6 +1,5 @@
 dataset/*
 model/*
-results/*
 code/__pycache__
 .DS_Store
 code/.DS_Store
