@@ -61,16 +61,16 @@ def test_model(model, data_path, magnifications, batch_size, device, model_file,
     overall_labels = []
 
     # Calculo de média e desvio padrão dos pixels das imagens
-    # mean, std = evaluateMeanStd(data_path)
+    mean, std = evaluateMeanStd(data_path)
 
     # Transformações para avaliação do modelo treinado
     test_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
-        transforms.Lambda(lambda x: enhance_colors(x)), # Aplica o realce de cores
-        transforms.Lambda(lambda x: adaptive_histogram_equalization(x)), # Aplica equalização
-        transforms.Lambda(lambda x: rgb_to_lab_transform(x)), # Conversão para formato Lab
+        #transforms.Lambda(lambda x: enhance_colors(x)), # Aplica o realce de cores
+        #transforms.Lambda(lambda x: adaptive_histogram_equalization(x)), # Aplica equalização
+        #transforms.Lambda(lambda x: rgb_to_lab_transform(x)), # Conversão para formato Lab
         transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
-        # transforms.Normalize(mean=mean, std=std)  # Normalização
+        transforms.Normalize(mean=mean, std=std)  # Normalização
     ])
 
     for magnification in magnifications:

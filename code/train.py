@@ -129,18 +129,18 @@ def main():
     optimizer_small = optim.Adam(small_model.parameters(), lr=learning_rate) # Adam, utilizado no artigo
 
     # Calculo de média e desvio padrão dos pixels das imagens
-    # mean, std = evaluateMeanStd(train_data_path)
+    mean, std = evaluateMeanStd(train_data_path)
 
     # Transformações conforme feito no artigo para treinar o modelo
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
         transforms.RandomHorizontalFlip(p=0.25), # Invertendo a imagem horizontalmente com probabilidade 25%
         transforms.RandomVerticalFlip(p=0.25), # Invertendo a imagem verticalmente com probabilidade 25%
-        transforms.Lambda(lambda x: enhance_colors(x)), # Aplica o realce de cores
-        transforms.Lambda(lambda x: adaptive_histogram_equalization(x)), # Aplica equalização
-        transforms.Lambda(lambda x: rgb_to_lab_transform(x)), # Conversão para formato Lab
+        #transforms.Lambda(lambda x: enhance_colors(x)), # Aplica o realce de cores
+        #transforms.Lambda(lambda x: adaptive_histogram_equalization(x)), # Aplica equalização
+        #transforms.Lambda(lambda x: rgb_to_lab_transform(x)), # Conversão para formato Lab
         transforms.ToTensor(), # Convertendo imagens para tensores(Vetor de características)
-        # transforms.Normalize(mean=mean, std=std)  # Normalização
+        transforms.Normalize(mean=mean, std=std)  # Normalização
     ])
 
     # Carrega o dataset de treino com todas as magnificações
@@ -156,7 +156,7 @@ def main():
         criterion=criterion,
         device=device,
         epochs=epochs,
-        model_name="large_model_with_filter.pth" 
+        model_name="large_model_with_normalization.pth" 
     )
     
     # Treinando modelo "small" no conjunto de treino
@@ -169,7 +169,7 @@ def main():
         criterion=criterion,
         device=device,
         epochs=epochs,
-        model_name="small_model_with_filter.pth" 
+        model_name="small_model_with_normalization.pth" 
     )
 
 if __name__ == "__main__":
