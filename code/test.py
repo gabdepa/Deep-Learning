@@ -8,12 +8,14 @@ from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
+# Transformações para avaliação do modelo treinado
 test_transform = transforms.Compose([
     transforms.Resize((224, 224)),  # Redimensionar as imagens
     transforms.ToTensor(),  # Convertendo imagens para tensores(Vetor de características)
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
 ])
 
+# Função de teste
 def test_model(model, test_data_path, magnifications, batch_size, device, model_file, results_dir, zero_division_value=1):
     # Inicializa as listas de resultados gerais
     magnification_levels = []
@@ -185,6 +187,7 @@ def test_model(model, test_data_path, magnifications, batch_size, device, model_
     plt.close()
     print("Metrics graph saved as:", metrics_graph_filename)
 
+# Fluxo principal
 def main():
     print("Diretório de trabalho atual:", os.getcwd())
     test_data_path = "dataset/test"

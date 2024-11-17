@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
 from model import MobileNetV3
 
+# Função de Treino
 def train_model(model, train_dataset, batch_size, optimizer, criterion, device, epochs, save_path):
     # Cria o DataLoader para treino
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -53,7 +54,8 @@ def main():
     magnifications = ["40X", "100X", "200X", "400X"]  # Magnificações disponíveis
     criterion = nn.CrossEntropyLoss()  # Função de perda
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Usa cuda se existir gpu, caso contrário usa cpu
-
+    print(f"Usando: {device}")
+    
     # Inicializa o modelo small
     small_model = MobileNetV3(
         num_classes=num_classes,

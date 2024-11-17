@@ -115,9 +115,10 @@ breakhis_dir = "dataset/BreaKHis_v1"
 source_dir = "dataset/BreaKHis_v1/histology_slides/breast"
 train_dir = "dataset/train"
 test_dir = "dataset/test"
+pycache_dir = "code/__pycache__"
 
 # Remover arquivos
-clean_folder(paths=[test_dir, train_dir, breakhis_dir])
+clean_folder(paths=[test_dir, train_dir, breakhis_dir, pycache_dir])
 
 # Extrai tar.gz
 extract_targz(breakhis_file)
