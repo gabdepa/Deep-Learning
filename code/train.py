@@ -93,6 +93,7 @@ def main():
     train_dataset = BreastCancerDataset(root_dir=train_data_path, transform=train_transform)
     
     # Treinando modelo "large" no conjunto de treino
+    print(f"Treinando modelo \"large\".")
     train_model(
         model=large_model,
         train_dataset=train_dataset,
@@ -104,6 +105,7 @@ def main():
         save_path="model/large_model.pth",
     )
     # Treinando modelo "small" no conjunto de treino
+    print(f"Treinando modelo \"small\".")
     train_model(
         model=small_model,
         train_dataset=train_dataset,
