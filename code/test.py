@@ -16,7 +16,7 @@ test_transform = transforms.Compose([
 ])
 
 def test_model(model, test_data_path, magnifications, batch_size, device, model_file, results_dir, zero_division_value=1):
-    # 1:Inicializa as listas de resultados gerais
+    # Inicializa as listas de resultados gerais
     magnification_levels = []
     accuracies = []
     precisions = []
@@ -149,6 +149,7 @@ def test_model(model, test_data_path, magnifications, batch_size, device, model_
     plt.savefig(os.path.join(results_dir, overall_cm_filename), dpi=300, bbox_inches="tight")
     plt.close()
 
+    # Imprime métricas
     print("Overall metrics:")
     print(f"Accuracy: {overall_accuracy:.3f}, Precision: {overall_precision:.3f}, Recall: {overall_recall:.3f}, F1-Score: {overall_f1:.3f}\n")
     print("Overall confusion matrix saved as:", overall_cm_filename)
@@ -183,7 +184,6 @@ def test_model(model, test_data_path, magnifications, batch_size, device, model_
     metrics_graph_filename = f"{model_file}_metrics.png"
     plt.savefig(os.path.join(results_dir, metrics_graph_filename), dpi=300, bbox_inches="tight")
     plt.close()
-
     print("Metrics graph saved as:", metrics_graph_filename)
 
 def main():
