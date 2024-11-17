@@ -185,8 +185,6 @@ class bneck(nn.Module):
         ks=False,
         ca=False,
         sk=False,
-        dp=False,
-        dropout_rate=0.2 # Adicionado pela dupla
     ): 
         super(bneck, self).__init__()
         self.in_channel = in_channel
@@ -197,9 +195,6 @@ class bneck(nn.Module):
         self.hidden_channel = int(in_channel * t)
         self.se = se
         self.activation = activation
-        #### Adicionado pela dupla
-        self.dp = dp  # Define o atributo dp
-        self.dropout = nn.Dropout(dropout_rate)  # Dropout instance
 
         layers = []
         if self.t != 1:
@@ -216,9 +211,6 @@ class bneck(nn.Module):
             self.sk_model = SKModel(out_channel)
         if self.ca:
             self.ca_model = CoordAtt(out_channel, out_channel)
-        #### Adicionado pela dupla
-        if self.dp:
-            layers += [self.dropout]  # Dropout após a última convolução
 
     def forward(self, x):
         if self.strid == 1 and self.in_channel == self.out_channel:
