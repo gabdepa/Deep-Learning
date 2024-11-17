@@ -2,6 +2,13 @@ import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from BreastCancerDataset import BreastCancerDataset
+from torchvision.transforms.functional import rgb_to_lab
+
+
+def rgbToLabTransform(img):
+    lab = rgb_to_lab(img)
+    return lab
+
 
 def evaluateMeanStd(data_path):
     """
@@ -14,7 +21,9 @@ def evaluateMeanStd(data_path):
         data_path (String): Caminho para diretório
     """
     # Resize de 224x224
-    transform = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()]) 
+    transform = transforms.Compose(
+        [transforms.Resize((224, 224)), transforms.ToTensor()]
+    )
 
     # Carregamento do conjunto de dados
     dataset = BreastCancerDataset(root_dir=data_path, transform=transform)
@@ -28,10 +37,10 @@ def evaluateMeanStd(data_path):
         batch_pixels = images.size(0) * images.size(2) * images.size(3)
         total_pixels += batch_pixels
         mean += images.sum(dim=[0, 2, 3])
-        std += (images ** 2).sum(dim=[0, 2, 3])
+        std += (images**2).sum(dim=[0, 2, 3])
 
     mean /= total_pixels
-    std = torch.sqrt(std / total_pixels - mean ** 2)
+    std = torch.sqrt(std / total_pixels - mean**2)
 
     print(f"Média para {data_path}: {mean}")
     print(f"Desvio Padrão {data_path}: {std}")
