@@ -77,8 +77,8 @@ def main():
     ).to(device)
 
     # Otimizador
-    optimizer_large = optim.Adam(large_model.parameters(), lr=learning_rate)
-    optimizer_small = optim.Adam(small_model.parameters(), lr=learning_rate)
+    optimizer_large = optim.Adam(large_model.parameters(), lr=learning_rate) # Adam, utilizado no artigo
+    optimizer_small = optim.Adam(small_model.parameters(), lr=learning_rate) # Adam, utilizado no artigo
 
     # Transformações conforme feito no artigo
     train_transform = transforms.Compose([
