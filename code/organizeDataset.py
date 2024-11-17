@@ -25,9 +25,7 @@ def extract_targz(file_path):
 
     # Abre e extrai
     with tarfile.open(file_path, "r:gz") as tar:
-        tar.extractall(
-            path=extract_path, filter="data"
-        )  # 'data' preserva os dados sem alterações
+        tar.extractall(path=extract_path, filter="data")  # 'data' preserva os dados sem alterações
     print(f"Arquivo {file_path} extraído em {extract_path}")
 
 def organize_dataset(source_dir, train_dir, test_dir, test_size):
@@ -35,13 +33,11 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
     magnifications = ["40X", "100X", "200X", "400X"]
 
     # Verifica se todas as entradas são strings
-    if not all(
-        isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]
-    ):
+    if not all(isinstance(directory, str) for directory in [source_dir, train_dir, test_dir]):
         raise TypeError("source_dir, train_dir, and test_dir must all be strings")
 
     for mag in magnifications:
-        print(f"Processando magnificacao: {mag}")
+        print(f"Processando magnificação: {mag}")
 
         for category in categories:
             category_path = os.path.join(source_dir, category, "SOB")
@@ -54,18 +50,18 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
                 subtype_path = os.path.join(category_path, subtype)
 
                 if not os.path.isdir(subtype_path):
-                    continue  # Pula se não for diretorio
+                    continue  # Pula se não for diretório
 
                 for slide_id in os.listdir(subtype_path):
                     slide_id_path = os.path.join(subtype_path, slide_id)
 
                     if not os.path.isdir(slide_id_path):
-                        continue  # Pula se não for diretorio
+                        continue  # Pula se não for diretório
 
                     # Caminho pra pasta da magnificacao corrente
                     mag_path = os.path.join(slide_id_path, mag)
                     if not os.path.exists(mag_path):
-                        continue  # Termina se diretorio não existir
+                        continue  # Termina se diretório não existir
 
                     # Coleta as imagens da pasta da magnificacao
                     all_images = [
@@ -80,10 +76,8 @@ def organize_dataset(source_dir, train_dir, test_dir, test_size):
 
                     # Verifica número de imagens antes de dividir
                     if len(all_images) >= 2:
-                        # Divide entre teste e treino
-                        train_images, test_images = train_test_split(
-                            all_images, test_size=test_size, random_state=42
-                        )
+                        # Divide entre treino e teste
+                        train_images, test_images = train_test_split(all_images, test_size=test_size, random_state=42)
                     else:
                         # Apenas uma imagem, usa como treino
                         train_images = all_images.copy()
