@@ -128,13 +128,17 @@ def main():
     optimizer_large = optim.Adam(large_model.parameters(), lr=learning_rate) # Adam, utilizado no artigo
     optimizer_small = optim.Adam(small_model.parameters(), lr=learning_rate) # Adam, utilizado no artigo
 
+    # Calculo de média e desvio padrão dos pixels das imagens de treino
+    #mean, std = evaluateMeanStd(train_data_path)
+
     # Transformações conforme feito no artigo para treinar o modelo
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)), # Redimensionar as imagens
         transforms.RandomHorizontalFlip(p=0.25), # Invertendo a imagem horizontalmente com probabilidade 25%
         transforms.RandomVerticalFlip(p=0.25), # Invertendo a imagem verticalmente com probabilidade 25%
         transforms.ToTensor(), # Convertendo imagens para tensores(Vetor de características)
-       # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
+        #transforms.Normalize(mean=mean, std=std)
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalização
     ])
 
     # Carrega o dataset de treino com todas as magnificações
