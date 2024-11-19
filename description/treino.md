@@ -1,11 +1,10 @@
-
 # Plano de Treinamento do Modelo de Classificação de Subtipos de Câncer de Mama
 
 Este documento descreve detalhadamente o plano de treinamento, incluindo a divisão de dados, técnicas de otimização e parâmetros de treinamento empregados na classificação de subtipos em imagens de patologia de câncer de mama utilizando uma rede neural profunda.
 
 ## Divisão dos Dados
 
-Para o treinamento do modelo, os dados foram divididos seguindo a proporção de 75% para o conjunto de treinamento e 25% para o conjunto de validação. Essa divisão permite uma avaliação adequada da generalização do modelo em dados não vistos, mantendo uma quantidade substancial de dados para o treinamento efetivo.
+Para o treinamento do modelo, os dados foram divididos seguindo a proporção de 80% para o conjunto de treinamento e 20% para o conjunto de validação. Essa divisão permite uma avaliação adequada da generalização do modelo em dados não vistos, mantendo uma quantidade substancial de dados para o treinamento efetivo.
 
 ## Técnicas de Treinamento
 

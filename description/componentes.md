@@ -47,25 +47,14 @@
 - **Descrição**: Estrutura a arquitetura geral do modelo, definindo a sequência de blocos bneck e outras operações de convolução.
 - **Variabilidade**: Diferencia-se em 'small' ou 'large' com variações na capacidade e profundidade, adaptando-se a diferentes requisitos computacionais e de performance.
 
-## 3. Funções de Treinamento e Teste
+## 3. Scripts de Treinamento e Teste
 
-### train_model
+### train.py
 
 - **Descrição**: Executa um ciclo de treinamento do modelo, gerenciando o processo de otimização.
 - **Funcionalidade**: Inclui o cálculo da perda e a atualização dos pesos do modelo via backpropagation.
 
-### train_model_2
-
-- **Descrição**: Versão mais complexa do treinamento que inclui validação e suporte a early stopping.
-- **Funcionalidade**: Interrompe o treinamento se o modelo não apresenta melhora, evitando desperdício de recursos.
-
-### test_model
+### test.py
 
 - **Descrição**: Avalia o desempenho do modelo em um conjunto de teste.
 - **Funcionalidade**: Calcula métricas como acurácia, precisão, recall e F1-score, essenciais para avaliar a aplicabilidade do modelo.
-
-## 4. Fluxo Principal main
-
-- **Descrição**: Configura e executa o processo de treinamento e teste, definindo hiperparâmetros e preparando os dados.
-- **Gerenciamento**: Inclui a instanciação do modelo e dos otimizadores, além de gerenciar o ciclo de vida completo do treinamento e teste, incluindo a possibilidade de salvar o modelo treinado.
-  """
